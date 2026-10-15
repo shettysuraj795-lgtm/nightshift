@@ -113,7 +113,7 @@ st.session_state.setdefault("errors", {})  # failure ID -> error name from the l
 # --- Header ---------------------------------------------------------------------
 
 st.markdown(
-    '<div class="ns-title">🌕 NightShift</div>'
+    '<div class="ns-title">🦉 NightShift</div>'
     '<div class="ns-subtitle">Overnight job triage · Nordwerk Antriebstechnik (pilot)</div>'
     '<span class="ns-demo">Demo environment · synthetic data</span>',
     unsafe_allow_html=True,

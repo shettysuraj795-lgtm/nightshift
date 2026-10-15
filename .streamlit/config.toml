@@ -1,4 +1,4 @@
-# Streamlit settings for the demo UI. The visual theme is added in Phase 7.
+# Streamlit settings for the NightShift demo UI.
 
 [server]
 # Skip the interactive first-run prompt; open http://localhost:8501 yourself.
@@ -6,3 +6,25 @@ headless = true
 
 [browser]
 gatherUsageStats = false
+
+[client]
+# Hide the developer menu so the demo looks like a product, not a dev tool.
+toolbarMode = "minimal"
+
+[theme]
+base = "light"
+primaryColor = "#1D4ED8"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F4F6FA"
+textColor = "#1F2937"
+borderColor = "#E3E7EE"
+showWidgetBorder = true
+baseRadius = "0.6rem"
+buttonRadius = "0.5rem"
+font = "sans-serif"
+headingFontWeights = [700, 650, 600, 600, 600, 600]
+metricValueFontSize = "1.9rem"
+linkColor = "#1D4ED8"
+greenColor = "#15803D"
+orangeColor = "#B45309"
+redColor = "#B91C1C"

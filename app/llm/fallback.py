@@ -14,11 +14,13 @@ import time
 from collections.abc import Callable
 
 from openai import APIConnectionError, APIStatusError, APITimeoutError, RateLimitError
+from opentelemetry.trace import Status, StatusCode
 from tenacity import Retrying, retry_if_exception, stop_after_attempt, wait_exponential_jitter
 
 from app.chaos import check_provider
 from app.config import Settings
 from app.llm.client import Attempt, LLMResponse, OpenAICompatibleProvider
+from app.telemetry import as_json, tracer
 
 logger = logging.getLogger(__name__)
 
@@ -50,18 +52,43 @@ class FallbackChain:
         self.sleep = sleep  # injectable so tests do not wait for backoff
 
     def _attempt(self, provider: OpenAICompatibleProvider, messages: list[dict[str, str]], attempts: list[Attempt]) -> LLMResponse:
-        """One call, recorded whether it succeeds or fails."""
+        """One call, recorded (and traced as an `llm_generate` span) whether it succeeds or fails."""
         number = 1 + sum(a.provider == provider.name for a in attempts)
-        started = time.perf_counter()
-        try:
-            check_provider(provider.name)  # chaos flag: fail as if the network were down
-            response = provider.generate_json(messages)
-        except Exception as error:
-            attempts.append(Attempt(provider.name, provider.model, number, type(error).__name__, _ms_since(started)))
-            logger.warning("%s attempt %d failed: %s", provider.name, number, error)
-            raise
-        attempts.append(Attempt(provider.name, provider.model, number, "ok", _ms_since(started)))
-        return response
+        with tracer.start_as_current_span("llm_generate") as span:
+            span.set_attributes({
+                "openinference.span.kind": "LLM",
+                "llm.provider": provider.name,
+                "llm.model_name": provider.model,
+                "llm.attempt": number,
+                "llm.is_retry": number > 1,
+                "llm.is_fallback": provider is not self.providers[0],
+                "input.value": as_json(messages),  # already redacted: no personal data
+                "input.mime_type": "application/json",
+            })
+            started = time.perf_counter()
+            try:
+                check_provider(provider.name)  # chaos flag: fail as if the network were down
+                response = provider.generate_json(messages)
+            except Exception as error:
+                latency = _ms_since(started)
+                attempts.append(Attempt(provider.name, provider.model, number, type(error).__name__, latency))
+                logger.warning("%s attempt %d failed: %s", provider.name, number, error)
+                span.set_attributes({"llm.latency_ms": latency, "llm.outcome": type(error).__name__})
+                span.record_exception(error)
+                span.set_status(Status(StatusCode.ERROR, str(error)))
+                raise
+            latency = _ms_since(started)
+            attempts.append(Attempt(provider.name, provider.model, number, "ok", latency))
+            span.set_attributes({
+                "llm.latency_ms": latency,
+                "llm.outcome": "ok",
+                "llm.model_name": response.model,  # what actually answered, as reported by the API
+                "llm.token_count.prompt": response.prompt_tokens or 0,
+                "llm.token_count.completion": response.completion_tokens or 0,
+                "llm.token_count.total": (response.prompt_tokens or 0) + (response.completion_tokens or 0),
+                "output.value": response.text,
+            })
+            return response
 
     def _call_with_retries(self, provider: OpenAICompatibleProvider, messages: list[dict[str, str]], attempts: list[Attempt]) -> LLMResponse:
         """Tenacity re-runs `_attempt` while it raises a transient error, waiting longer each time."""

@@ -13,13 +13,14 @@ policy, so the safety rules never depend on which path produced the answer.
 import json
 import logging
 import re
-import uuid
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 from typing import Protocol
 
+from opentelemetry import trace
+from opentelemetry.trace import Status, StatusCode
 from pydantic import ValidationError
 
 from app.config import Settings, get_settings
@@ -37,6 +38,7 @@ from app.registry import Action, FailureMode, load_registry
 from app.retrieval.store import RetrievedDoc, Retriever
 from app.schemas import Citation, Failure, Step, TriageDraft, TriageResult
 from app.signatures import SignatureMatch, match_signatures
+from app.telemetry import current_trace_id, tracer
 
 logger = logging.getLogger(__name__)
 
@@ -231,19 +233,32 @@ class TriagePipeline:
             prompt_hook(messages)
         return self.llm.generate_json(messages, start_at=start_at)
 
+    def _parse(self, response: LLMResponse) -> TriageDraft:
+        """Validate one model answer, traced as a `parse_output` span."""
+        with tracer.start_as_current_span("parse_output") as span:
+            span.set_attributes({"openinference.span.kind": "GUARDRAIL", "llm.provider": response.provider})
+            try:
+                draft = parse_draft(response.text)
+            except ValidationError as error:
+                span.set_attributes({"output.valid": False, "output.error_count": error.error_count()})
+                raise
+            span.set_attribute("output.valid", True)
+            return draft
+
     def generate(self, messages: list[dict[str, str]], prompt_hook: PromptHook | None = None) -> tuple[TriageDraft, LLMResponse]:
         """Call the model; if the JSON is invalid, show it the error once and ask again."""
         response = self._call(messages, prompt_hook)
         try:
-            return parse_draft(response.text), response
+            return self._parse(response), response
         except ValidationError as error:
             logger.warning("Invalid model output, attempting one repair (%d errors)", error.error_count())
+            trace.get_current_span().add_event("repair_attempted", {"error_count": error.error_count()})
             repair = messages + [
                 {"role": "assistant", "content": response.text},
                 {"role": "user", "content": f"Your reply did not match the required JSON format:\n{error}\nReply again with only the corrected JSON object."},
             ]
             response = self._call(repair, prompt_hook, start_at=response.provider)
-            return parse_draft(response.text), response
+            return self._parse(response), response
 
     def finalise(self, ctx: RunContext, draft: TriageDraft, mode: str, model_used: str, fallback_used: bool) -> TriageResult:
         """Output guardrails, abstention and policy: turns any draft into a safe result."""
@@ -251,66 +266,85 @@ class TriagePipeline:
         flagged_lines, retrieved = ctx.flagged_lines, ctx.retrieved
         kb_scores = [d.score for d in retrieved if d.collection == "kb"]
 
-        # 1. Remove anything that repeats the injected instruction.
-        trusted_text = "\n".join([line for line in ctx.log_text.splitlines() if line not in flagged_lines] + [d.text for d in retrieved])
-        identifiers = injected_identifiers(flagged_lines, trusted_text)
-        evidence = [e for e in draft.evidence if not is_tainted(e, flagged_lines, identifiers)]
-        steps = [s for s in draft.steps if not is_tainted(s.text, flagged_lines, identifiers)]
-        removed = len(draft.evidence) - len(evidence) + len(draft.steps) - len(steps)
-        if removed:
-            events.append(f"injected_text_removed:{removed}")
-        root_cause_tainted = is_tainted(draft.root_cause, flagged_lines, identifiers)
+        with tracer.start_as_current_span("validate_output") as span:
+            span.set_attribute("openinference.span.kind", "GUARDRAIL")
+            events_before = len(events)
 
-        # 2. Category must be a known registry category, and must agree with
-        #    the deterministic signature matcher when it found something.
-        known_categories = {m.category for m in self.modes}
-        category = draft.category if draft.category in known_categories else UNKNOWN_CATEGORY
-        if category != draft.category:
-            events.append("unknown_category_replaced")
-        signature_categories = [m.category for m in ctx.matches]
-        agrees = not signature_categories or category in signature_categories
-        if not agrees:
-            events.append(f"category_disagrees_with_signature:{signature_categories[0]}")
+            # 1. Remove anything that repeats the injected instruction.
+            trusted_text = "\n".join([line for line in ctx.log_text.splitlines() if line not in flagged_lines] + [d.text for d in retrieved])
+            identifiers = injected_identifiers(flagged_lines, trusted_text)
+            evidence = [e for e in draft.evidence if not is_tainted(e, flagged_lines, identifiers)]
+            steps = [s for s in draft.steps if not is_tainted(s.text, flagged_lines, identifiers)]
+            removed = len(draft.evidence) - len(evidence) + len(draft.steps) - len(steps)
+            if removed:
+                events.append(f"injected_text_removed:{removed}")
+            root_cause_tainted = is_tainted(draft.root_cause, flagged_lines, identifiers)
 
-        # 3. Steps must be allowed for this failure mode and never forbidden.
-        step_check = check_steps(steps, mode_for_category(category, self.modes))
-        steps = step_check.kept
-        events += step_check.events
+            # 2. Category must be a known registry category, and must agree with
+            #    the deterministic signature matcher when it found something.
+            known_categories = {m.category for m in self.modes}
+            category = draft.category if draft.category in known_categories else UNKNOWN_CATEGORY
+            if category != draft.category:
+                events.append("unknown_category_replaced")
+            signature_categories = [m.category for m in ctx.matches]
+            agrees = not signature_categories or category in signature_categories
+            if not agrees:
+                events.append(f"category_disagrees_with_signature:{signature_categories[0]}")
 
-        # 4. Citations must quote a retrieved source.
-        citation_check = validate_citations(draft.citations, retrieved)
-        if citation_check.dropped:
-            events.append(f"citations_dropped:{citation_check.dropped}")
+            # 3. Steps must be allowed for this failure mode and never forbidden.
+            step_check = check_steps(steps, mode_for_category(category, self.modes))
+            steps = step_check.kept
+            events += step_check.events
 
-        # 5. Abstain when the evidence is weak. With the knowledge base down,
-        #    retrieval and citations cannot be judged, so those checks are skipped.
-        reasons = abstention_reasons(
-            kb_available=ctx.kb_available,
-            top_retrieval_score=max(kb_scores, default=None),
-            valid_citations=len(citation_check.valid),
-            confidence=draft.confidence,
-            model_escalated=draft.escalate,
-            known_category=category != UNKNOWN_CATEGORY,
-            agrees_with_signatures=agrees,
-            steps_left=len(steps),
-            min_retrieval_score=self.settings.abstain_min_retrieval_score,
-            min_confidence=self.settings.abstain_min_confidence,
-        )
-        root_cause = draft.root_cause
-        if root_cause_tainted:
-            reasons.append("the diagnosis repeated a suspicious instruction from the log")
-            root_cause = "Withheld: the diagnosis repeated a suspicious instruction found in the log."
-        if reasons:
-            steps = [ESCALATION_STEP]
-            events.append("abstained")
+            # 4. Citations must quote a retrieved source.
+            citation_check = validate_citations(draft.citations, retrieved)
+            if citation_check.dropped:
+                events.append(f"citations_dropped:{citation_check.dropped}")
 
-        # 6. Risk and approval come from the registry, never from the model;
-        #    the strictest of the chosen category and any signature match.
-        decision = decide(category, steps, self.modes, signature_categories)
-        if decision.risk != draft.risk:
-            events.append(f"policy_override:risk={draft.risk}->{decision.risk}")
-        if decision.approval_required != draft.approval_required:
-            events.append(f"policy_override:approval_required={str(draft.approval_required).lower()}->{str(decision.approval_required).lower()}")
+            # 5. Abstain when the evidence is weak. With the knowledge base down,
+            #    retrieval and citations cannot be judged, so those checks are skipped.
+            reasons = abstention_reasons(
+                kb_available=ctx.kb_available,
+                top_retrieval_score=max(kb_scores, default=None),
+                valid_citations=len(citation_check.valid),
+                confidence=draft.confidence,
+                model_escalated=draft.escalate,
+                known_category=category != UNKNOWN_CATEGORY,
+                agrees_with_signatures=agrees,
+                steps_left=len(steps),
+                min_retrieval_score=self.settings.abstain_min_retrieval_score,
+                min_confidence=self.settings.abstain_min_confidence,
+            )
+            root_cause = draft.root_cause
+            if root_cause_tainted:
+                reasons.append("the diagnosis repeated a suspicious instruction from the log")
+                root_cause = "Withheld: the diagnosis repeated a suspicious instruction found in the log."
+            if reasons:
+                steps = [ESCALATION_STEP]
+                events.append("abstained")
+            span.set_attributes({
+                "guardrail.events": events[events_before:],
+                "guardrail.citations_valid": len(citation_check.valid),
+                "guardrail.citations_dropped": citation_check.dropped,
+                "guardrail.abstained": bool(reasons),
+                "guardrail.abstention_reasons": reasons,
+            })
+
+        with tracer.start_as_current_span("apply_policy") as span:
+            # 6. Risk and approval come from the registry, never from the model;
+            #    the strictest of the chosen category and any signature match.
+            decision = decide(category, steps, self.modes, signature_categories)
+            if decision.risk != draft.risk:
+                events.append(f"policy_override:risk={draft.risk}->{decision.risk}")
+            if decision.approval_required != draft.approval_required:
+                events.append(f"policy_override:approval_required={str(draft.approval_required).lower()}->{str(decision.approval_required).lower()}")
+            span.set_attributes({
+                "openinference.span.kind": "GUARDRAIL",
+                "policy.model_risk": draft.risk,
+                "policy.risk": decision.risk,
+                "policy.model_approval_required": draft.approval_required,
+                "policy.approval_required": decision.approval_required,
+            })
 
         return TriageResult(
             failure_id=ctx.failure_id,
@@ -328,28 +362,63 @@ class TriagePipeline:
             model_used=model_used,
             fallback_used=fallback_used,
             guardrail_events=events,
-            trace_id=uuid.uuid4().hex,
+            trace_id=current_trace_id(),
         )
 
     def run_log(self, failure_id: str, log_text: str, prompt_hook: PromptHook | None = None) -> TriageResult:
-        """Triage a log directly (also used by the evals)."""
-        # Redact first: nothing below ever sees the original personal data.
-        redaction = self.redactor.redact(log_text)
+        """Triage a log directly (also used by the evals). One call is one trace."""
+        with tracer.start_as_current_span("triage") as span:
+            span.set_attributes({"openinference.span.kind": "CHAIN", "failure_id": failure_id, "input.value": failure_id})
+            result = self._run(failure_id, log_text, prompt_hook)
+            span.set_attributes({
+                "category": result.category,
+                "risk": result.risk,
+                "approval_required": result.approval_required,
+                "mode": result.mode,
+                "model_used": result.model_used,
+                "fallback_used": result.fallback_used,
+                "guardrail_events": result.guardrail_events,
+                "abstained": result.escalate,
+                "output.value": result.model_dump_json(),  # built from the redacted log: no personal data
+                "output.mime_type": "application/json",
+            })
+            return result
+
+    def _run(self, failure_id: str, log_text: str, prompt_hook: PromptHook | None) -> TriageResult:
+        # Redact first: nothing below, including the trace, ever sees the original personal data.
+        with tracer.start_as_current_span("redact") as span:
+            redaction = self.redactor.redact(log_text)
+            span.set_attributes({"openinference.span.kind": "GUARDRAIL",
+                                 **{f"pii.{kind.lower()}_count": n for kind, n in redaction.counts.items()}})
         log = redaction.text
         events = redaction.events()
 
-        flagged = find_injection_lines(log)
+        with tracer.start_as_current_span("injection_check") as span:
+            flagged = find_injection_lines(log)
+            span.set_attributes({"openinference.span.kind": "GUARDRAIL", "injection.flagged_lines": len(flagged)})
         if flagged:
             events.append(f"injection_detected:lines={len(flagged)}")
 
         ctx = RunContext(failure_id, log, flagged, match_signatures(log, self.modes), events=events)
 
-        try:
-            kb_docs, ticket_docs = self.retrieve(log)
-        except Exception:  # Qdrant down or unreachable: answer from the signatures alone, quickly
-            logger.exception("Knowledge base unavailable for %s", failure_id)
-            ctx.kb_available = False
-            ctx.events.append("knowledge_base_unavailable")
+        with tracer.start_as_current_span("retrieve") as span:
+            span.set_attributes({"openinference.span.kind": "RETRIEVER",
+                                 "signature.categories": [m.category for m in ctx.matches]})
+            try:
+                kb_docs, ticket_docs = self.retrieve(log)
+            except Exception as error:  # Qdrant down or unreachable: answer from the signatures alone, quickly
+                logger.exception("Knowledge base unavailable for %s", failure_id)
+                span.record_exception(error)
+                span.set_status(Status(StatusCode.ERROR, "knowledge base unavailable"))
+                ctx.kb_available = False
+                ctx.events.append("knowledge_base_unavailable")
+            else:
+                span.set_attributes({
+                    "retrieval.doc_ids": [d.doc_id for d in kb_docs + ticket_docs],
+                    "retrieval.scores": [round(d.score, 4) for d in kb_docs + ticket_docs],
+                    "retrieval.top_kb_score": max((d.score for d in kb_docs), default=0.0),
+                })
+        if not ctx.kb_available:
             draft = degraded_draft(ctx.matches, [], self.modes, self.settings)
             return self.finalise(ctx, draft, "degraded", DEGRADED_MODEL_NAME, fallback_used=False)
         ctx.retrieved = kb_docs + ticket_docs

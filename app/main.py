@@ -1,17 +1,36 @@
 """NightShift API."""
 
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException
 
 from app.chaos import ChaosFlags, ChaosUpdate, get_flags, update_flags
 from app.schemas import Failure, FailureDetail, TriageResult
+from app.telemetry import flush, setup_tracing
 from app.triage.pipeline import get_failure, get_pipeline, load_failures, read_log
 
 APP_VERSION = "0.1.0"
 
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    """Start sending spans to Phoenix when the server starts (not on import, so tests stay offline)."""
+    setup_tracing()
+    yield
+    flush()
+
+
+# FastAPI's own built-in telemetry is switched off, so no request details (such
+# as caller addresses) reach traces or logs: no operator identity, by design.
+# Each triage trace starts at the pipeline's `triage` span.
 app = FastAPI(
     title="NightShift",
     description="AI triage assistant for failed overnight batch jobs (synthetic demo data).",
     version=APP_VERSION,
+    telemetry={"tracing": False, "metrics": False, "logs": False, "operation_spans": False},
+    lifespan=lifespan,
 )
 
 

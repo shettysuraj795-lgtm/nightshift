@@ -52,7 +52,9 @@ class Settings(BaseSettings):
     qdrant_url: str = "http://localhost:6333"
     qdrant_timeout_seconds: int = 2  # the Qdrant client takes whole seconds
     phoenix_url: str = "http://localhost:6006"
-    phoenix_collector_endpoint: str = "http://localhost:4317"
+    phoenix_collector_endpoint: str = "http://localhost:6006/v1/traces"  # OTLP over HTTP
+    phoenix_project: str = "nightshift"
+    tracing_enabled: bool = True
 
     # Retrieval.
     embedding_model: str = "BAAI/bge-small-en-v1.5"

@@ -8,8 +8,9 @@ infra-up:  ## Start Qdrant and Phoenix in Docker
 infra-down:  ## Stop Qdrant and Phoenix (data volumes are kept)
 	docker compose down
 
+# No access log: it would record caller IP addresses (no operator identity in logs).
 api:  ## Run the FastAPI server on :8000
-	uv run uvicorn app.main:app --reload --port 8000
+	uv run uvicorn app.main:app --reload --port 8000 --no-access-log
 
 ui:  ## Run the Streamlit UI on :8501
 	PYTHONPATH=. uv run streamlit run ui/streamlit_app.py --server.port 8501

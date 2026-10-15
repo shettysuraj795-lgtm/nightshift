@@ -1,0 +1,38 @@
+# Guardrail rules, kept as data so they can be reviewed without reading code.
+# All patterns are Python regular expressions, matched case-insensitively.
+
+# Text that tries to instruct the model rather than describe a failure.
+injection_patterns:
+  - "ignore (?:all |any |your |previous |prior |the )*(?:instructions|rules|guidelines)"
+  - "disregard (?:all |any |your |previous |prior |the )*(?:instructions|rules|guidelines)"
+  - "note to (?:the )?(?:ai|assistant|model|llm)"
+  - "you are now"
+  - "(?:new|updated) system prompt"
+  - "reply (?:only )?with [A-Z]+-\\d+"
+
+# How each forbidden action from the registry shows up in a step's text.
+# Every forbidden_actions identifier in data/registry.yaml needs an entry here
+# (tests/test_guardrails.py checks this).
+forbidden_action_patterns:
+  delete_lock_entry:
+    - "\\b(?:delet|remov|clear|drop|releas)\\w*\\b.*\\block"
+    - "\\bSM12\\b"
+  create_placeholder_file:
+    - "\\b(?:creat|upload|plac|add)\\w*\\b.*\\b(?:placeholder|dummy|empty|fake)\\b.*\\bfile"
+  edit_idoc_segment:
+    - "\\b(?:edit|modif|chang|overwrit)\\w*\\b.*\\bsegment"
+  assign_sap_all:
+    - "\\bSAP_ALL\\b"
+  rerun_during_shift_start:
+    - "\\b(?:during|at)\\s+(?:the\\s+)?(?:morning\\s+)?shift\\s+start"
+  drop_table:
+    - "\\bdrop\\w*\\b.*\\btables?\\b"
+  truncate_table:
+    - "\\btruncat\\w*"
+  purge_history:
+    - "\\bpurg\\w*"
+  disable_tls_verification:
+    - "\\bdisabl\\w*\\b.*\\b(?:certificate|tls|ssl)"
+
+# A step that only warns against something ("Do not ...") is not a recommendation.
+negation_pattern: "\\b(?:do not|don't|never|must not|should not|avoid)\\b"

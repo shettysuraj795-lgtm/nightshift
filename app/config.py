@@ -31,6 +31,10 @@ class Settings(BaseSettings):
     # the root cause, so the result reports this fixed, modest confidence.
     degraded_confidence: float = 0.5
 
+    # Abstention: below these, escalate to L2 instead of answering.
+    abstain_min_retrieval_score: float = 0.70
+    abstain_min_confidence: float = 0.5
+
     # Local fallback LLM.
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "qwen2.5:3b"

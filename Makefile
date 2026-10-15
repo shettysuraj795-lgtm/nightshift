@@ -1,0 +1,27 @@
+.PHONY: infra-up infra-down api ui data ingest test eval
+
+infra-up:  ## Start Qdrant and Phoenix in Docker
+	docker compose up -d
+	@echo "Qdrant:  http://localhost:6333/dashboard"
+	@echo "Phoenix: http://localhost:6006"
+
+infra-down:  ## Stop Qdrant and Phoenix (data volumes are kept)
+	docker compose down
+
+api:  ## Run the FastAPI server on :8000
+	uv run uvicorn app.main:app --reload --port 8000
+
+ui:  ## Run the Streamlit UI on :8501
+	PYTHONPATH=. uv run streamlit run ui/streamlit_app.py --server.port 8501
+
+data:  ## Generate synthetic data (Phase 1)
+	@echo "Not implemented until Phase 1." && exit 1
+
+ingest:  ## Embed the KB and tickets into Qdrant (Phase 2)
+	@echo "Not implemented until Phase 2." && exit 1
+
+test:  ## Run the unit tests
+	uv run pytest
+
+eval:  ## Run the eval suite and regression gate (Phase 6)
+	@echo "Not implemented until Phase 6." && exit 1

@@ -1,0 +1,23 @@
+# Infrastructure only: the API and UI run natively via `uv run` (see Makefile).
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.19.2
+    ports:
+      - "6333:6333"   # REST
+      - "6334:6334"   # gRPC
+    volumes:
+      - qdrant_data:/qdrant/storage
+
+  phoenix:
+    image: arizephoenix/phoenix:version-20.22.0
+    ports:
+      - "6006:6006"   # UI and OTLP over HTTP
+      - "4317:4317"   # OTLP over gRPC
+    volumes:
+      - phoenix_data:/phoenix_data
+    environment:
+      PHOENIX_WORKING_DIR: /phoenix_data
+
+volumes:
+  qdrant_data:
+  phoenix_data:

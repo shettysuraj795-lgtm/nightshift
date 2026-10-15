@@ -1,0 +1,8 @@
+# Streamlit settings for the demo UI. The visual theme is added in Phase 7.
+
+[server]
+# Skip the interactive first-run prompt; open http://localhost:8501 yourself.
+headless = true
+
+[browser]
+gatherUsageStats = false

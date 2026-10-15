@@ -1,0 +1,9 @@
+2026-10-14 00:48:00 INFO  Job SUPPLIER_PRICE_IMPORT_PL01 started (run 46500, host batch04)
+2026-10-14 00:48:55 INFO  Connecting to SFTP gateway sftp.nordwerk.example as svc_import
+2026-10-14 00:51:14 INFO  Heartbeat sent to scheduler
+2026-10-14 00:51:48 INFO  Polling /inbound/suppliers/kessler/ for pattern ASN_KESSLER_20261014*.csv
+2026-10-14 00:54:54 INFO  Poll 3 of 3: 0 files matched
+2026-10-14 00:58:54 INFO  Import profile KESSLER_PL01 loaded
+2026-10-14 01:02:40 ERROR File ASN_KESSLER_20261014.csv not found in /inbound/suppliers/kessler/
+2026-10-14 01:05:07 INFO  No data imported for supplier KESSLER
+2026-10-14 01:07:35 ERROR Job SUPPLIER_PRICE_IMPORT_PL01 ended with status CANCELLED, return code 8

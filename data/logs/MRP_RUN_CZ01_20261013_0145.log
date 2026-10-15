@@ -1,0 +1,11 @@
+2026-10-13 01:45:00 INFO  Job MRP_RUN_CZ01 started (run 29887, host batch02)
+2026-10-13 01:48:28 INFO  MRP live started for plant CZ01, planning mode NETCH
+2026-10-13 01:50:53 INFO  834 materials selected for planning
+2026-10-13 01:52:11 INFO  Planning checkpoint: 63% of materials planned
+2026-10-13 01:52:33 INFO  Batch window for plant CZ01 ends at 04:45
+2026-10-13 01:53:37 INFO  Checkpoint written
+2026-10-13 01:54:08 INFO  Heartbeat sent to scheduler
+2026-10-13 04:45:00 ERROR MRP run exceeded its time window: planned end 04:45, 309 materials still open
+2026-10-13 04:48:16 ERROR Job cancelled by scheduler: maximum runtime of 180 min reached
+2026-10-13 04:50:03 INFO  Planning results saved for 63% of materials
+2026-10-13 04:52:39 ERROR Job MRP_RUN_CZ01 ended with status CANCELLED, return code 8

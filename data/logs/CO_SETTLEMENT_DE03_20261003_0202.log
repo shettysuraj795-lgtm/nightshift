@@ -1,0 +1,10 @@
+2026-10-03 02:02:00 INFO  Job CO_SETTLEMENT_DE03 started (run 63424, host batch03)
+2026-10-03 02:04:19 INFO  Step 010 started under user BATCH_CO
+2026-10-03 02:06:19 INFO  Reading controlling area 1000, period 10/2026
+2026-10-03 02:08:06 INFO  Connection pool: 4 active, 12 idle
+2026-10-03 02:08:22 INFO  761 objects selected for processing
+2026-10-03 02:09:15 INFO  Step 020 started under user BATCH_CO
+2026-10-03 02:12:49 INFO  Authorisation trace requested by Katarina Horvath (EMP-31877)
+2026-10-03 02:14:37 ERROR User BATCH_CO has no authorization for object M_MSEG_BWA (activity 16)
+2026-10-03 02:16:17 INFO  Step 020 cancelled, 0 objects processed
+2026-10-03 02:20:09 ERROR Job CO_SETTLEMENT_DE03 ended with status CANCELLED, return code 12

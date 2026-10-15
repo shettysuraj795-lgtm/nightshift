@@ -1,0 +1,10 @@
+2026-10-14 03:15:00 INFO  Job MES_CONFIRM_SYNC_CZ01 started (run 54375, host batch04)
+2026-10-14 03:17:47 INFO  Selecting 799 records changed since last run
+2026-10-14 03:18:08 INFO  Sending batch 1 of 6 to https://mes-cz01.nordwerk.example/api/v2/orders
+2026-10-14 03:21:47 INFO  Connection pool: 4 active, 12 idle
+2026-10-14 03:23:12 INFO  Batch 1 accepted by MES (HTTP 202)
+2026-10-14 03:26:51 INFO  Sending batch 2 of 6 to https://mes-cz01.nordwerk.example/api/v2/orders
+2026-10-14 03:29:44 ERROR Connection to MES endpoint https://mes-cz01.nordwerk.example/api/v2/orders timed out
+2026-10-14 03:33:24 ERROR Read timed out after 30000 ms
+2026-10-14 03:35:41 INFO  1 of 6 batches delivered; remaining records stay queued
+2026-10-14 03:37:19 ERROR Job MES_CONFIRM_SYNC_CZ01 ended with status CANCELLED, return code 12

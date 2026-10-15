@@ -1,0 +1,9 @@
+2026-10-10 00:48:00 INFO  Job SUPPLIER_PRICE_IMPORT_PL01 started (run 35112, host batch02)
+2026-10-10 00:50:18 INFO  Connecting to SFTP gateway sftp.nordwerk.example as svc_import
+2026-10-10 00:52:13 INFO  Polling /inbound/suppliers/zajac/ for pattern ASN_ZAJAC_20261010*.csv
+2026-10-10 00:52:49 INFO  Poll 5 of 5: 0 files matched
+2026-10-10 00:54:38 INFO  Connection pool: 4 active, 12 idle
+2026-10-10 00:55:25 INFO  Import profile ZAJAC_PL01 loaded
+2026-10-10 00:56:37 ERROR File ASN_ZAJAC_20261010.csv not found in /inbound/suppliers/zajac/
+2026-10-10 00:58:36 INFO  No data imported for supplier ZAJAC
+2026-10-10 00:59:40 ERROR Job SUPPLIER_PRICE_IMPORT_PL01 ended with status CANCELLED, return code 8

@@ -1,0 +1,10 @@
+2026-10-07 01:47:00 INFO  Job FI_POST_CZ01_NIGHTLY started (run 21915, host batch01)
+2026-10-07 01:50:41 INFO  Selecting released supplier invoices for company code 2000
+2026-10-07 01:51:10 INFO  336 invoices selected for posting, period 10/2026
+2026-10-07 01:51:50 INFO  Connection pool: 4 active, 12 idle
+2026-10-07 01:54:31 INFO  Posting variant NIGHTLY_CZ01 loaded
+2026-10-07 01:55:12 WARN  Clock drift of 120 ms detected against time server
+2026-10-07 01:58:35 INFO  Document type KR, posting date 2026-10-07
+2026-10-07 02:01:30 ERROR Object FI document 1900051857/2000/2026 is locked by user BATCH_FI
+2026-10-07 02:03:19 INFO  138 of 336 invoices posted before the run stopped
+2026-10-07 02:05:52 ERROR Job FI_POST_CZ01_NIGHTLY ended with status CANCELLED, return code 12

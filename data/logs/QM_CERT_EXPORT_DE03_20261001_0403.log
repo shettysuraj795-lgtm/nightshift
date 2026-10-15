@@ -1,0 +1,11 @@
+2026-10-01 04:03:00 INFO  Job QM_CERT_EXPORT_DE03 started (run 93283, host batch04)
+2026-10-01 04:06:53 INFO  Selecting certificates of conformity released since last run
+2026-10-01 04:09:53 INFO  390 certificates selected for export
+2026-10-01 04:11:11 INFO  Resolving signing key from key vault reference kv-qm-de03/cert-signing
+2026-10-01 04:13:58 INFO  Heartbeat sent to scheduler
+2026-10-01 04:15:43 INFO  Signing certificate 1 of 390
+2026-10-01 04:16:13 WARN  Clock drift of 120 ms detected against time server
+2026-10-01 04:16:49 ERROR QM certificate export failed: signing provider returned 0x8009030E (keyset does not exist)
+2026-10-01 04:17:01 ERROR Private key handle for kv-qm-de03/cert-signing is empty after successful resolution
+2026-10-01 04:17:11 INFO  0 of 390 certificates exported
+2026-10-01 04:18:29 ERROR Job QM_CERT_EXPORT_DE03 ended with status CANCELLED, return code 8

@@ -1,0 +1,10 @@
+2026-10-14 01:30:00 INFO  Job FI_POST_DE01_NIGHTLY started (run 83563, host batch02)
+2026-10-14 01:33:04 INFO  Selecting released supplier invoices for company code 1000
+2026-10-14 01:35:51 INFO  879 invoices selected for posting, period 10/2026
+2026-10-14 01:38:51 WARN  Spool output truncated to 1000 lines
+2026-10-14 01:41:11 INFO  Posting variant NIGHTLY_DE01 loaded
+2026-10-14 01:42:59 INFO  Document type KR, posting date 2026-10-14
+2026-10-14 01:43:56 ERROR Object FI document 1900096531/1000/2026 is locked by user BATCH_FI
+2026-10-14 01:45:51 ERROR ENQUEUE conflict on table BKPF, lock held by job FI_POST_DE01_INTRADAY
+2026-10-14 01:48:22 INFO  344 of 879 invoices posted before the run stopped
+2026-10-14 01:49:34 ERROR Job FI_POST_DE01_NIGHTLY ended with status CANCELLED, return code 8

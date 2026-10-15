@@ -1,0 +1,10 @@
+2026-10-12 01:49:00 INFO  Job MRP_RUN_CZ01 started (run 69087, host batch02)
+2026-10-12 01:52:13 INFO  MRP live started for plant CZ01, planning mode NETCH
+2026-10-12 01:54:12 INFO  132 materials selected for planning
+2026-10-12 01:56:38 INFO  Planning checkpoint: 81% of materials planned
+2026-10-12 01:59:15 INFO  Checkpoint written
+2026-10-12 02:02:07 INFO  Connection pool: 4 active, 12 idle
+2026-10-12 02:03:45 INFO  Batch window for plant CZ01 ends at 04:45
+2026-10-12 04:49:00 ERROR MRP run exceeded its time window: planned end 04:45, 26 materials still open
+2026-10-12 04:49:08 INFO  Planning results saved for 81% of materials
+2026-10-12 04:51:15 ERROR Job MRP_RUN_CZ01 ended with status CANCELLED, return code 12

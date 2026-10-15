@@ -1,0 +1,9 @@
+2026-10-03 02:15:00 INFO  Job EDI_IDOC_INBOUND_DE04 started (run 58393, host batch02)
+2026-10-03 02:16:51 INFO  Selecting inbound IDocs of type DESADV for plant DE04
+2026-10-03 02:17:24 INFO  Heartbeat sent to scheduler
+2026-10-03 02:17:35 INFO  377 IDocs selected, partner ZAJAC
+2026-10-03 02:18:54 INFO  Processing IDoc 0000004046228
+2026-10-03 02:20:28 INFO  Mapping supplier part numbers to material master
+2026-10-03 02:24:19 ERROR IDoc 0000004046228 (DESADV) set to status 51: application document not posted
+2026-10-03 02:28:18 INFO  11 of 377 IDocs in status 51
+2026-10-03 02:31:42 ERROR Job EDI_IDOC_INBOUND_DE04 ended with status CANCELLED, return code 8

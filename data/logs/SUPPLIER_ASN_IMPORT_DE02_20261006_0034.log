@@ -1,0 +1,11 @@
+2026-10-06 00:34:00 INFO  Job SUPPLIER_ASN_IMPORT_DE02 started (run 34890, host batch03)
+2026-10-06 00:34:56 INFO  Connecting to SFTP gateway sftp.nordwerk.example as svc_import
+2026-10-06 00:35:11 INFO  Polling /inbound/suppliers/kessler/ for pattern ASN_KESSLER_20261006*.csv
+2026-10-06 00:37:40 INFO  Poll 3 of 3: 0 files matched
+2026-10-06 00:40:49 WARN  Deprecated parameter BATCH_SIZE ignored
+2026-10-06 00:43:08 INFO  Connection pool: 4 active, 12 idle
+2026-10-06 00:43:24 INFO  Import profile KESSLER_DE02 loaded
+2026-10-06 00:46:36 INFO  Supplier notified: logistics@brandt-praezision.example, phone +49 30 555 0199
+2026-10-06 00:47:57 ERROR SFTP: no matching file for pattern ASN_KESSLER_20261006*.csv after 3 polls
+2026-10-06 00:48:12 INFO  No data imported for supplier KESSLER
+2026-10-06 00:48:25 ERROR Job SUPPLIER_ASN_IMPORT_DE02 ended with status CANCELLED, return code 8

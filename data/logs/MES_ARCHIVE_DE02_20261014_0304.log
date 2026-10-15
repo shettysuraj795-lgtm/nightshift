@@ -1,0 +1,10 @@
+2026-10-14 03:04:00 INFO  Job MES_ARCHIVE_DE02 started (run 82350, host batch01)
+2026-10-14 03:04:41 INFO  Selecting closed production orders older than 90 days
+2026-10-14 03:04:42 WARN  Deprecated parameter BATCH_SIZE ignored
+2026-10-14 03:06:27 INFO  655 orders selected for archiving
+2026-10-14 03:08:23 INFO  Copying order headers to MES.OPERATION_LOG
+2026-10-14 03:11:20 INFO  Commit interval set to 500 rows
+2026-10-14 03:13:53 ERROR ORA-01653: unable to extend table MES.OPERATION_LOG by 1024 in tablespace MES_DATA
+2026-10-14 03:15:54 ERROR Insert into MES.OPERATION_LOG failed: tablespace MES_DATA is full
+2026-10-14 03:17:09 INFO  315 of 655 orders archived, transaction rolled back
+2026-10-14 03:17:18 ERROR Job MES_ARCHIVE_DE02 ended with status CANCELLED, return code 8

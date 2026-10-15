@@ -1,0 +1,92 @@
+[
+  {
+    "id": "S1",
+    "job": "SUPPLIER_ASN_IMPORT_DE02",
+    "plant": "DE02",
+    "system": "SFTP gateway",
+    "failed_at": "2026-10-14T00:53:18",
+    "log_file": "data/logs/SUPPLIER_ASN_IMPORT_DE02_20261014_0032.log",
+    "pinned": true
+  },
+  {
+    "id": "S2",
+    "job": "FI_POST_DE01_NIGHTLY",
+    "plant": "DE01",
+    "system": "SAP S/4HANA",
+    "failed_at": "2026-10-14T01:49:34",
+    "log_file": "data/logs/FI_POST_DE01_NIGHTLY_20261014_0130.log",
+    "pinned": true
+  },
+  {
+    "id": "S3",
+    "job": "EDI_IDOC_INBOUND_DE01",
+    "plant": "DE01",
+    "system": "SAP S/4HANA",
+    "failed_at": "2026-10-14T01:09:42",
+    "log_file": "data/logs/EDI_IDOC_INBOUND_DE01_20261014_0045.log",
+    "pinned": true
+  },
+  {
+    "id": "S4",
+    "job": "QM_CERT_EXPORT_DE03",
+    "plant": "DE03",
+    "system": "Azure data platform",
+    "failed_at": "2026-10-14T04:27:40",
+    "log_file": "data/logs/QM_CERT_EXPORT_DE03_20261014_0402.log",
+    "pinned": true
+  },
+  {
+    "id": "F-005",
+    "job": "CO_SETTLEMENT_DE03",
+    "plant": "DE03",
+    "system": "SAP S/4HANA",
+    "failed_at": "2026-10-14T02:23:13",
+    "log_file": "data/logs/CO_SETTLEMENT_DE03_20261014_0202.log",
+    "pinned": false
+  },
+  {
+    "id": "F-006",
+    "job": "MRP_RUN_DE01",
+    "plant": "DE01",
+    "system": "SAP S/4HANA",
+    "failed_at": "2026-10-14T04:51:15",
+    "log_file": "data/logs/MRP_RUN_DE01_20261014_0145.log",
+    "pinned": false
+  },
+  {
+    "id": "F-007",
+    "job": "MES_ARCHIVE_DE02",
+    "plant": "DE02",
+    "system": "Plant MES",
+    "failed_at": "2026-10-14T03:17:18",
+    "log_file": "data/logs/MES_ARCHIVE_DE02_20261014_0304.log",
+    "pinned": false
+  },
+  {
+    "id": "F-008",
+    "job": "MES_ORDER_SYNC_DE02",
+    "plant": "DE02",
+    "system": "Plant MES",
+    "failed_at": "2026-10-14T01:04:33",
+    "log_file": "data/logs/MES_ORDER_SYNC_DE02_20261014_0045.log",
+    "pinned": false
+  },
+  {
+    "id": "F-009",
+    "job": "SUPPLIER_PRICE_IMPORT_PL01",
+    "plant": "PL01",
+    "system": "SFTP gateway",
+    "failed_at": "2026-10-14T01:07:35",
+    "log_file": "data/logs/SUPPLIER_PRICE_IMPORT_PL01_20261014_0048.log",
+    "pinned": false
+  },
+  {
+    "id": "F-010",
+    "job": "MES_CONFIRM_SYNC_CZ01",
+    "plant": "CZ01",
+    "system": "Plant MES",
+    "failed_at": "2026-10-14T03:37:19",
+    "log_file": "data/logs/MES_CONFIRM_SYNC_CZ01_20261014_0315.log",
+    "pinned": false
+  }
+]

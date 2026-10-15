@@ -1,0 +1,10 @@
+2026-10-08 01:45:00 INFO  Job EDI_IDOC_INBOUND_DE01 started (run 15075, host batch04)
+2026-10-08 01:45:57 INFO  Selecting inbound IDocs of type DESADV for plant DE01
+2026-10-08 01:46:49 INFO  802 IDocs selected, partner BRANDT
+2026-10-08 01:50:19 WARN  Spool output truncated to 1000 lines
+2026-10-08 01:54:15 INFO  Processing IDoc 0000004785884
+2026-10-08 01:56:13 INFO  Checkpoint written
+2026-10-08 01:57:43 INFO  Mapping supplier part numbers to material master
+2026-10-08 01:59:02 ERROR IDoc 0000004785884 (DESADV) set to status 51: application document not posted
+2026-10-08 02:02:33 INFO  9 of 802 IDocs in status 51
+2026-10-08 02:05:57 ERROR Job EDI_IDOC_INBOUND_DE01 ended with status CANCELLED, return code 12

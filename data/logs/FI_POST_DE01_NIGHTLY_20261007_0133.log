@@ -1,0 +1,10 @@
+2026-10-07 01:33:00 INFO  Job FI_POST_DE01_NIGHTLY started (run 30032, host batch03)
+2026-10-07 01:36:16 INFO  Selecting released supplier invoices for company code 1000
+2026-10-07 01:36:58 INFO  661 invoices selected for posting, period 10/2026
+2026-10-07 01:39:17 INFO  Heartbeat sent to scheduler
+2026-10-07 01:42:37 INFO  Posting variant NIGHTLY_DE01 loaded
+2026-10-07 01:46:34 INFO  Document type KR, posting date 2026-10-07
+2026-10-07 01:48:50 WARN  Deprecated parameter BATCH_SIZE ignored
+2026-10-07 01:52:46 ERROR ENQUEUE conflict on table BKPF, lock held by job FI_POST_DE01_INTRADAY
+2026-10-07 01:52:47 INFO  448 of 661 invoices posted before the run stopped
+2026-10-07 01:55:21 ERROR Job FI_POST_DE01_NIGHTLY ended with status CANCELLED, return code 8

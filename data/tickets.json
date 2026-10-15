@@ -1,0 +1,302 @@
+[
+  {
+    "number": "INC0041001",
+    "job": "FI_POST_DE01_NIGHTLY",
+    "opened": "2025-02-18",
+    "closed": "2025-02-21",
+    "symptom": "FI_POST_DE01_NIGHTLY failed overnight: Object FI document 1900031877/1000/2025 is locked by user BATCH_FI",
+    "resolution": "Lock entry deleted in SM12 and posting job restarted, following KB-0091. This caused duplicate postings that finance had to reverse. Procedure replaced by KB-0101.",
+    "linked_kb": "KB-0091",
+    "resolver_group": "L1 Batch Operations"
+  },
+  {
+    "number": "INC0041002",
+    "job": "MES_ARCHIVE_DE04",
+    "opened": "2025-10-01",
+    "closed": "2025-10-03",
+    "symptom": "MES_ARCHIVE_DE04 failed overnight: Insert into MES.QUALITY_RESULTS failed: tablespace MES_DATA is full",
+    "resolution": "Database team added a data file to the tablespace. Archive job rerun successfully.",
+    "linked_kb": "KB-0106",
+    "resolver_group": "L2 Database"
+  },
+  {
+    "number": "INC0041003",
+    "job": "SUPPLIER_ASN_IMPORT_DE02",
+    "opened": "2025-10-04",
+    "closed": "2025-10-05",
+    "symptom": "SUPPLIER_ASN_IMPORT_DE02 failed overnight: SFTP: no matching file for pattern ASN_BRANDT_20251004*.csv after 3 polls",
+    "resolution": "Upload failed on the supplier's side. Supplier resent the file and the import was rerun.",
+    "linked_kb": "KB-0102",
+    "resolver_group": "L1 Batch Operations"
+  },
+  {
+    "number": "INC0041004",
+    "job": "MES_ARCHIVE_DE04",
+    "opened": "2025-10-19",
+    "closed": "2025-10-21",
+    "symptom": "MES_ARCHIVE_DE04 failed overnight: Insert into MES.ORDER_HISTORY failed: tablespace MES_DATA is full",
+    "resolution": "Database team added a data file to the tablespace. Archive job rerun successfully.",
+    "linked_kb": "KB-0106",
+    "resolver_group": "L2 Database"
+  },
+  {
+    "number": "INC0041005",
+    "job": "MES_ARCHIVE_DE04",
+    "opened": "2025-11-04",
+    "closed": "2025-11-05",
+    "symptom": "MES_ARCHIVE_DE04 failed overnight: ORA-01653: unable to extend table MES.QUALITY_RESULTS by 1024 in tablespace MES_DATA",
+    "resolution": "Database team added a data file to the tablespace. Archive job rerun successfully.",
+    "linked_kb": "KB-0106",
+    "resolver_group": "L2 Database"
+  },
+  {
+    "number": "INC0041006",
+    "job": "EDI_IDOC_INBOUND_DE04",
+    "opened": "2025-11-06",
+    "closed": "2025-11-09",
+    "symptom": "EDI_IDOC_INBOUND_DE04 failed overnight: IDoc 0000004903987 (DESADV) set to status 51: application document not posted",
+    "resolution": "Master data team extended the material to the plant. Failed IDocs reprocessed successfully.",
+    "linked_kb": "KB-0103",
+    "resolver_group": "Master Data"
+  },
+  {
+    "number": "INC0041007",
+    "job": "MRP_RUN_CZ01",
+    "opened": "2025-11-12",
+    "closed": "2025-11-13",
+    "symptom": "MRP_RUN_CZ01 failed overnight: Job cancelled by scheduler: maximum runtime of 180 min reached",
+    "resolution": "MRP rerun with reduced scope after approval from production planning. Change request raised to review the batch window.",
+    "linked_kb": "KB-0105",
+    "resolver_group": "L2 SAP Basis"
+  },
+  {
+    "number": "INC0041008",
+    "job": "FI_POST_DE01_NIGHTLY",
+    "opened": "2025-11-16",
+    "closed": "2025-11-16",
+    "symptom": "FI_POST_DE01_NIGHTLY failed overnight: ENQUEUE conflict on table BKPF, lock held by job FI_POST_DE01_INTRADAY",
+    "resolution": "Confirmed the lock holder job had completed and reran the posting job after approval. Change request raised to move the intraday run.",
+    "linked_kb": "KB-0101",
+    "resolver_group": "L1 Batch Operations"
+  },
+  {
+    "number": "INC0041009",
+    "job": "MES_ARCHIVE_DE02",
+    "opened": "2025-12-16",
+    "closed": "2025-12-17",
+    "symptom": "MES_ARCHIVE_DE02 failed overnight: ORA-01653: unable to extend table MES.ORDER_HISTORY by 1024 in tablespace MES_DATA",
+    "resolution": "Database team extended the tablespace and added a size alert. Job rerun successfully.",
+    "linked_kb": "KB-0106",
+    "resolver_group": "L2 Database"
+  },
+  {
+    "number": "INC0041010",
+    "job": "EDI_IDOC_INBOUND_DE04",
+    "opened": "2025-12-27",
+    "closed": "2025-12-29",
+    "symptom": "EDI_IDOC_INBOUND_DE04 failed overnight: IDoc 0000004456839 (DESADV) set to status 51: application document not posted",
+    "resolution": "Master data team extended the material to the plant. Failed IDocs reprocessed successfully.",
+    "linked_kb": "KB-0103",
+    "resolver_group": "Master Data"
+  },
+  {
+    "number": "INC0041011",
+    "job": "SUPPLIER_ASN_IMPORT_DE02",
+    "opened": "2026-01-01",
+    "closed": "2026-01-02",
+    "symptom": "SUPPLIER_ASN_IMPORT_DE02 failed overnight: File ASN_NOVOTNY_20260101.csv not found in /inbound/suppliers/novotny/",
+    "resolution": "File had been uploaded with the wrong date in its name. Supplier resent it with the correct name and the import was rerun.",
+    "linked_kb": "KB-0102",
+    "resolver_group": "L1 Batch Operations"
+  },
+  {
+    "number": "INC0041012",
+    "job": "CO_SETTLEMENT_DE03",
+    "opened": "2026-01-18",
+    "closed": "2026-01-19",
+    "symptom": "CO_SETTLEMENT_DE03 failed overnight: Authority check failed for object K_ORDER",
+    "resolution": "SAP security restored the missing authorisation object to the batch role. Job rerun successfully.",
+    "linked_kb": "KB-0104",
+    "resolver_group": "L2 SAP Security"
+  },
+  {
+    "number": "INC0041013",
+    "job": "MES_CONFIRM_SYNC_CZ01",
+    "opened": "2026-02-17",
+    "closed": "2026-02-20",
+    "symptom": "MES_CONFIRM_SYNC_CZ01 failed overnight: Connection to MES endpoint https://mes-cz01.nordwerk.example/api/v2/orders timed out",
+    "resolution": "MES endpoint was briefly unavailable during a restart. Sync job rerun successfully.",
+    "linked_kb": "KB-0107",
+    "resolver_group": "Plant IT"
+  },
+  {
+    "number": "INC0041014",
+    "job": "MES_CONFIRM_SYNC_CZ01",
+    "opened": "2026-02-18",
+    "closed": "2026-02-20",
+    "symptom": "MES_CONFIRM_SYNC_CZ01 failed overnight: Read timed out after 30000 ms",
+    "resolution": "Short outage on the site network link. Sync rerun successfully.",
+    "linked_kb": "KB-0107",
+    "resolver_group": "Plant IT"
+  },
+  {
+    "number": "INC0041015",
+    "job": "MM_STOCK_REVAL_PL01",
+    "opened": "2026-03-08",
+    "closed": "2026-03-10",
+    "symptom": "MM_STOCK_REVAL_PL01 failed overnight: User BATCH_MM has no authorization for object K_ORDER (activity 16)",
+    "resolution": "Role change from the access review was rolled back for the batch user. Job rerun successfully.",
+    "linked_kb": "KB-0104",
+    "resolver_group": "L2 SAP Security"
+  },
+  {
+    "number": "INC0041016",
+    "job": "FI_POST_CZ01_NIGHTLY",
+    "opened": "2026-03-30",
+    "closed": "2026-03-30",
+    "symptom": "FI_POST_CZ01_NIGHTLY failed overnight: ENQUEUE conflict on table BKPF, lock held by job FI_POST_CZ01_INTRADAY",
+    "resolution": "Confirmed the lock holder job had completed and reran the posting job after approval. Change request raised to move the intraday run.",
+    "linked_kb": "KB-0101",
+    "resolver_group": "L1 Batch Operations"
+  },
+  {
+    "number": "INC0041017",
+    "job": "MRP_RUN_DE01",
+    "opened": "2026-04-10",
+    "closed": "2026-04-10",
+    "symptom": "MRP_RUN_DE01 failed overnight: MRP run exceeded its time window: planned end 04:45, 37 materials still open",
+    "resolution": "MRP rerun with reduced scope after approval from production planning. Change request raised to review the batch window.",
+    "linked_kb": "KB-0105",
+    "resolver_group": "L2 SAP Basis"
+  },
+  {
+    "number": "INC0041018",
+    "job": "MM_STOCK_REVAL_PL01",
+    "opened": "2026-04-28",
+    "closed": "2026-04-28",
+    "symptom": "MM_STOCK_REVAL_PL01 failed overnight: Authority check failed for object M_MATE_WRK",
+    "resolution": "SAP security restored the missing authorisation object to the batch role. Job rerun successfully.",
+    "linked_kb": "KB-0104",
+    "resolver_group": "L2 SAP Security"
+  },
+  {
+    "number": "INC0041019",
+    "job": "FI_POST_CZ01_NIGHTLY",
+    "opened": "2026-05-16",
+    "closed": "2026-05-19",
+    "symptom": "FI_POST_CZ01_NIGHTLY failed overnight: ENQUEUE conflict on table BKPF, lock held by job FI_POST_CZ01_INTRADAY",
+    "resolution": "Waited for the intraday posting job to finish, then reran the posting job with approval from the finance job owner. No duplicate postings.",
+    "linked_kb": "KB-0101",
+    "resolver_group": "L1 Batch Operations"
+  },
+  {
+    "number": "INC0041020",
+    "job": "SUPPLIER_PRICE_IMPORT_PL01",
+    "opened": "2026-05-21",
+    "closed": "2026-05-24",
+    "symptom": "SUPPLIER_PRICE_IMPORT_PL01 failed overnight: SFTP: no matching file for pattern ASN_NOVOTNY_20260521*.csv after 3 polls",
+    "resolution": "Upload failed on the supplier's side. Supplier resent the file and the import was rerun.",
+    "linked_kb": "KB-0102",
+    "resolver_group": "L1 Batch Operations"
+  },
+  {
+    "number": "INC0041021",
+    "job": "EDI_IDOC_INBOUND_DE04",
+    "opened": "2026-05-25",
+    "closed": "2026-05-26",
+    "symptom": "EDI_IDOC_INBOUND_DE04 failed overnight: Material 7111-729-X does not exist in plant DE04",
+    "resolution": "Supplier had used an old part number and resent the shipping notification with the correct material. Failed IDocs closed.",
+    "linked_kb": "KB-0103",
+    "resolver_group": "Master Data"
+  },
+  {
+    "number": "INC0041022",
+    "job": "SUPPLIER_PRICE_IMPORT_PL01",
+    "opened": "2026-06-06",
+    "closed": "2026-06-09",
+    "symptom": "SUPPLIER_PRICE_IMPORT_PL01 failed overnight: File ASN_ZAJAC_20260606.csv not found in /inbound/suppliers/zajac/",
+    "resolution": "Upload failed on the supplier's side. Supplier resent the file and the import was rerun.",
+    "linked_kb": "KB-0102",
+    "resolver_group": "L1 Batch Operations"
+  },
+  {
+    "number": "INC0041023",
+    "job": "MM_STOCK_REVAL_PL01",
+    "opened": "2026-06-14",
+    "closed": "2026-06-16",
+    "symptom": "MM_STOCK_REVAL_PL01 failed overnight: Authority check failed for object K_CSKS",
+    "resolution": "Role change from the access review was rolled back for the batch user. Job rerun successfully.",
+    "linked_kb": "KB-0104",
+    "resolver_group": "L2 SAP Security"
+  },
+  {
+    "number": "INC0041024",
+    "job": "EDI_IDOC_INBOUND_DE01",
+    "opened": "2026-06-19",
+    "closed": "2026-06-20",
+    "symptom": "EDI_IDOC_INBOUND_DE01 failed overnight: IDoc 0000004858729 (DESADV) set to status 51: application document not posted",
+    "resolution": "Master data team extended the material to the plant. Failed IDocs reprocessed successfully.",
+    "linked_kb": "KB-0103",
+    "resolver_group": "Master Data"
+  },
+  {
+    "number": "INC0041025",
+    "job": "MRP_RUN_CZ01",
+    "opened": "2026-07-20",
+    "closed": "2026-07-20",
+    "symptom": "MRP_RUN_CZ01 failed overnight: Job cancelled by scheduler: maximum runtime of 180 min reached",
+    "resolution": "Production planning agreed a recovery slot. MRP rerun for the plant and finished before shift start.",
+    "linked_kb": "KB-0105",
+    "resolver_group": "L2 SAP Basis"
+  },
+  {
+    "number": "INC0041026",
+    "job": "MES_CONFIRM_SYNC_CZ01",
+    "opened": "2026-08-05",
+    "closed": "2026-08-05",
+    "symptom": "MES_CONFIRM_SYNC_CZ01 failed overnight: Read timed out after 60000 ms",
+    "resolution": "Short outage on the site network link. Sync rerun successfully.",
+    "linked_kb": "KB-0107",
+    "resolver_group": "Plant IT"
+  },
+  {
+    "number": "INC0041027",
+    "job": "MES_ORDER_SYNC_DE02",
+    "opened": "2026-08-06",
+    "closed": "2026-08-06",
+    "symptom": "MES_ORDER_SYNC_DE02 failed overnight: Connection to MES endpoint https://mes-de02.nordwerk.example/api/v2/orders timed out",
+    "resolution": "MES endpoint was briefly unavailable during a restart. Sync job rerun successfully.",
+    "linked_kb": "KB-0107",
+    "resolver_group": "Plant IT"
+  },
+  {
+    "number": "INC0041028",
+    "job": "MRP_RUN_DE01",
+    "opened": "2026-08-16",
+    "closed": "2026-08-19",
+    "symptom": "MRP_RUN_DE01 failed overnight: Job cancelled by scheduler: maximum runtime of 180 min reached",
+    "resolution": "Production planning agreed a recovery slot. MRP rerun for the plant and finished before shift start.",
+    "linked_kb": "KB-0105",
+    "resolver_group": "L2 SAP Basis"
+  },
+  {
+    "number": "INC0041029",
+    "job": "EDI_IDOC_INBOUND_DE01",
+    "opened": "2026-08-18",
+    "closed": "2026-08-20",
+    "symptom": "EDI_IDOC_INBOUND_DE01 failed overnight: IDoc 0000004331495 (DESADV) set to status 51: application document not posted",
+    "resolution": "Master data team extended the material to the plant. Failed IDocs reprocessed successfully.",
+    "linked_kb": "KB-0103",
+    "resolver_group": "Master Data"
+  },
+  {
+    "number": "INC0041030",
+    "job": "FI_POST_DE01_NIGHTLY",
+    "opened": "2026-09-01",
+    "closed": "2026-09-02",
+    "symptom": "FI_POST_DE01_NIGHTLY failed overnight: ENQUEUE conflict on table BKPF, lock held by job FI_POST_DE01_INTRADAY",
+    "resolution": "Confirmed the lock holder job had completed and reran the posting job after approval. Change request raised to move the intraday run.",
+    "linked_kb": "KB-0101",
+    "resolver_group": "L1 Batch Operations"
+  }
+]

@@ -1,0 +1,9 @@
+2026-10-11 01:15:00 INFO  Job MES_ORDER_SYNC_DE02 started (run 67898, host batch03)
+2026-10-11 01:17:31 INFO  Selecting 744 records changed since last run
+2026-10-11 01:18:48 INFO  Sending batch 1 of 6 to https://mes-de02.nordwerk.example/api/v2/orders
+2026-10-11 01:21:32 INFO  Batch 1 accepted by MES (HTTP 202)
+2026-10-11 01:23:21 INFO  Connection pool: 4 active, 12 idle
+2026-10-11 01:26:18 INFO  Sending batch 2 of 6 to https://mes-de02.nordwerk.example/api/v2/orders
+2026-10-11 01:27:23 ERROR Connection to MES endpoint https://mes-de02.nordwerk.example/api/v2/orders timed out
+2026-10-11 01:29:20 INFO  1 of 6 batches delivered; remaining records stay queued
+2026-10-11 01:32:57 ERROR Job MES_ORDER_SYNC_DE02 ended with status CANCELLED, return code 8

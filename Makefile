@@ -14,8 +14,8 @@ api:  ## Run the FastAPI server on :8000
 ui:  ## Run the Streamlit UI on :8501
 	PYTHONPATH=. uv run streamlit run ui/streamlit_app.py --server.port 8501
 
-data:  ## Generate synthetic data (Phase 1)
-	@echo "Not implemented until Phase 1." && exit 1
+data:  ## Regenerate synthetic data from data/registry.yaml (seed 42)
+	PYTHONPATH=. uv run python scripts/generate_data.py --seed 42
 
 ingest:  ## Embed the KB and tickets into Qdrant (Phase 2)
 	@echo "Not implemented until Phase 2." && exit 1

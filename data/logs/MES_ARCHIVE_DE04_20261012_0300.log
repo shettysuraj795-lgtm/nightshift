@@ -1,0 +1,10 @@
+2026-10-12 03:00:00 INFO  Job MES_ARCHIVE_DE04 started (run 82255, host batch02)
+2026-10-12 03:01:39 INFO  Selecting closed production orders older than 90 days
+2026-10-12 03:02:28 INFO  846 orders selected for archiving
+2026-10-12 03:06:24 INFO  Copying order headers to MES.OPERATION_LOG
+2026-10-12 03:08:58 INFO  Commit interval set to 500 rows
+2026-10-12 03:11:09 WARN  Deprecated parameter BATCH_SIZE ignored
+2026-10-12 03:14:21 WARN  Clock drift of 120 ms detected against time server
+2026-10-12 03:18:07 ERROR ORA-01653: unable to extend table MES.OPERATION_LOG by 1024 in tablespace MES_DATA
+2026-10-12 03:18:42 INFO  218 of 846 orders archived, transaction rolled back
+2026-10-12 03:22:24 ERROR Job MES_ARCHIVE_DE04 ended with status CANCELLED, return code 12

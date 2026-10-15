@@ -1,0 +1,10 @@
+2026-10-01 01:45:00 INFO  Job FI_POST_CZ01_NIGHTLY started (run 20328, host batch03)
+2026-10-01 01:48:33 INFO  Selecting released supplier invoices for company code 2000
+2026-10-01 01:51:14 INFO  834 invoices selected for posting, period 10/2026
+2026-10-01 01:53:53 INFO  Posting variant NIGHTLY_CZ01 loaded
+2026-10-01 01:57:40 INFO  Document type KR, posting date 2026-10-01
+2026-10-01 02:01:21 INFO  Checkpoint written
+2026-10-01 02:02:54 ERROR Object FI document 1900028222/2000/2026 is locked by user BATCH_FI
+2026-10-01 02:05:22 ERROR ENQUEUE conflict on table BKPF, lock held by job FI_POST_CZ01_INTRADAY
+2026-10-01 02:06:12 INFO  382 of 834 invoices posted before the run stopped
+2026-10-01 02:09:13 ERROR Job FI_POST_CZ01_NIGHTLY ended with status CANCELLED, return code 12

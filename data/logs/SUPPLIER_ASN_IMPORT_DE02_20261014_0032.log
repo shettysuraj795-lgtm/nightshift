@@ -1,0 +1,10 @@
+2026-10-14 00:32:00 INFO  Job SUPPLIER_ASN_IMPORT_DE02 started (run 80686, host batch02)
+2026-10-14 00:35:03 INFO  Connecting to SFTP gateway sftp.nordwerk.example as svc_import
+2026-10-14 00:36:23 INFO  Polling /inbound/suppliers/zajac/ for pattern ASN_ZAJAC_20261014*.csv
+2026-10-14 00:38:06 INFO  Poll 3 of 3: 0 files matched
+2026-10-14 00:40:58 WARN  Clock drift of 120 ms detected against time server
+2026-10-14 00:43:45 INFO  Import profile ZAJAC_DE02 loaded
+2026-10-14 00:45:21 WARN  Spool output truncated to 1000 lines
+2026-10-14 00:47:14 ERROR SFTP: no matching file for pattern ASN_ZAJAC_20261014*.csv after 3 polls
+2026-10-14 00:51:05 INFO  No data imported for supplier ZAJAC
+2026-10-14 00:53:18 ERROR Job SUPPLIER_ASN_IMPORT_DE02 ended with status CANCELLED, return code 8

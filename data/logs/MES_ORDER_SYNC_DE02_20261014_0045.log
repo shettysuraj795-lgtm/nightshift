@@ -1,0 +1,10 @@
+2026-10-14 00:45:00 INFO  Job MES_ORDER_SYNC_DE02 started (run 84946, host batch04)
+2026-10-14 00:46:00 INFO  Selecting 544 records changed since last run
+2026-10-14 00:49:40 INFO  Sending batch 1 of 7 to https://mes-de02.nordwerk.example/api/v2/orders
+2026-10-14 00:52:59 INFO  Batch 1 accepted by MES (HTTP 202)
+2026-10-14 00:54:45 INFO  Sending batch 2 of 7 to https://mes-de02.nordwerk.example/api/v2/orders
+2026-10-14 00:54:57 WARN  Clock drift of 120 ms detected against time server
+2026-10-14 00:56:19 WARN  Deprecated parameter BATCH_SIZE ignored
+2026-10-14 00:59:30 ERROR Connection to MES endpoint https://mes-de02.nordwerk.example/api/v2/orders timed out
+2026-10-14 01:01:32 INFO  1 of 7 batches delivered; remaining records stay queued
+2026-10-14 01:04:33 ERROR Job MES_ORDER_SYNC_DE02 ended with status CANCELLED, return code 8

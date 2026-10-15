@@ -1,0 +1,10 @@
+2026-10-10 03:15:00 INFO  Job MES_CONFIRM_SYNC_CZ01 started (run 92345, host batch01)
+2026-10-10 03:18:52 INFO  Selecting 229 records changed since last run
+2026-10-10 03:21:33 INFO  Sending batch 1 of 7 to https://mes-cz01.nordwerk.example/api/v2/orders
+2026-10-10 03:24:19 WARN  Spool output truncated to 1000 lines
+2026-10-10 03:24:30 INFO  Batch 1 accepted by MES (HTTP 202)
+2026-10-10 03:25:50 WARN  Deprecated parameter BATCH_SIZE ignored
+2026-10-10 03:29:12 INFO  Sending batch 2 of 7 to https://mes-cz01.nordwerk.example/api/v2/orders
+2026-10-10 03:31:05 ERROR Read timed out after 30000 ms
+2026-10-10 03:31:14 INFO  1 of 7 batches delivered; remaining records stay queued
+2026-10-10 03:33:43 ERROR Job MES_CONFIRM_SYNC_CZ01 ended with status CANCELLED, return code 8

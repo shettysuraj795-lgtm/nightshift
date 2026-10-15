@@ -7,6 +7,7 @@ dependencies = [
     "fastapi==0.143.1",
     "pydantic==2.14.1",
     "pydantic-settings==2.16.0",
+    "pyyaml==6.0.3",
     "requests==2.34.2",
     "streamlit==1.66.0",
     "uvicorn[standard]==0.54.0",
@@ -20,3 +21,4 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]

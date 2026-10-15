@@ -1,0 +1,10 @@
+2026-10-14 01:45:00 INFO  Job MRP_RUN_DE01 started (run 99687, host batch01)
+2026-10-14 01:48:24 INFO  MRP live started for plant DE01, planning mode NETCH
+2026-10-14 01:50:49 INFO  596 materials selected for planning
+2026-10-14 01:54:10 INFO  Heartbeat sent to scheduler
+2026-10-14 01:54:21 INFO  Planning checkpoint: 71% of materials planned
+2026-10-14 01:55:50 INFO  Batch window for plant DE01 ends at 04:45
+2026-10-14 04:45:00 ERROR MRP run exceeded its time window: planned end 04:45, 173 materials still open
+2026-10-14 04:46:50 ERROR Job cancelled by scheduler: maximum runtime of 180 min reached
+2026-10-14 04:49:40 INFO  Planning results saved for 71% of materials
+2026-10-14 04:51:15 ERROR Job MRP_RUN_DE01 ended with status CANCELLED, return code 12

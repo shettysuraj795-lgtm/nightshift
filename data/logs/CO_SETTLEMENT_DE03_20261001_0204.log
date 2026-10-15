@@ -1,0 +1,10 @@
+2026-10-01 02:04:00 INFO  Job CO_SETTLEMENT_DE03 started (run 91560, host batch01)
+2026-10-01 02:07:53 INFO  Step 010 started under user BATCH_CO
+2026-10-01 02:09:34 INFO  Reading controlling area 1000, period 10/2026
+2026-10-01 02:12:06 INFO  608 objects selected for processing
+2026-10-01 02:14:31 INFO  Heartbeat sent to scheduler
+2026-10-01 02:17:21 INFO  Connection pool: 4 active, 12 idle
+2026-10-01 02:17:28 INFO  Step 020 started under user BATCH_CO
+2026-10-01 02:17:50 ERROR Authority check failed for object K_CSKS
+2026-10-01 02:20:35 INFO  Step 020 cancelled, 0 objects processed
+2026-10-01 02:22:25 ERROR Job CO_SETTLEMENT_DE03 ended with status CANCELLED, return code 8

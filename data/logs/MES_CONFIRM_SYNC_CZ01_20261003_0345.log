@@ -1,0 +1,10 @@
+2026-10-03 03:45:00 INFO  Job MES_CONFIRM_SYNC_CZ01 started (run 17355, host batch03)
+2026-10-03 03:46:32 INFO  Selecting 752 records changed since last run
+2026-10-03 03:48:08 INFO  Sending batch 1 of 3 to https://mes-cz01.nordwerk.example/api/v2/orders
+2026-10-03 03:49:59 INFO  Batch 1 accepted by MES (HTTP 202)
+2026-10-03 03:50:37 INFO  Checkpoint written
+2026-10-03 03:51:40 INFO  Sending batch 2 of 3 to https://mes-cz01.nordwerk.example/api/v2/orders
+2026-10-03 03:53:56 INFO  On-call plant IT contact: Tomasz Zielinski, +48 61 555 0123
+2026-10-03 03:55:42 ERROR Connection to MES endpoint https://mes-cz01.nordwerk.example/api/v2/orders timed out
+2026-10-03 03:58:07 INFO  1 of 3 batches delivered; remaining records stay queued
+2026-10-03 04:01:02 ERROR Job MES_CONFIRM_SYNC_CZ01 ended with status CANCELLED, return code 12

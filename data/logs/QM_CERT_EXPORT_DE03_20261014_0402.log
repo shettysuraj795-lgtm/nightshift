@@ -1,0 +1,11 @@
+2026-10-14 04:02:00 INFO  Job QM_CERT_EXPORT_DE03 started (run 28449, host batch02)
+2026-10-14 04:05:41 INFO  Selecting certificates of conformity released since last run
+2026-10-14 04:08:35 WARN  Deprecated parameter BATCH_SIZE ignored
+2026-10-14 04:11:41 INFO  212 certificates selected for export
+2026-10-14 04:14:34 INFO  Resolving signing key from key vault reference kv-qm-de03/cert-signing
+2026-10-14 04:16:16 INFO  Connection pool: 4 active, 12 idle
+2026-10-14 04:19:53 INFO  Signing certificate 1 of 212
+2026-10-14 04:23:19 ERROR QM certificate export failed: signing provider returned 0x8009030E (keyset does not exist)
+2026-10-14 04:25:42 ERROR Private key handle for kv-qm-de03/cert-signing is empty after successful resolution
+2026-10-14 04:27:16 INFO  0 of 212 certificates exported
+2026-10-14 04:27:40 ERROR Job QM_CERT_EXPORT_DE03 ended with status CANCELLED, return code 8

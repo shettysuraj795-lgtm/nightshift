@@ -1,0 +1,10 @@
+2026-10-10 00:15:00 INFO  Job EDI_IDOC_INBOUND_DE01 started (run 89457, host batch01)
+2026-10-10 00:16:39 INFO  Selecting inbound IDocs of type DESADV for plant DE01
+2026-10-10 00:20:30 INFO  528 IDocs selected, partner BRANDT
+2026-10-10 00:22:58 INFO  Processing IDoc 0000004672642
+2026-10-10 00:23:47 INFO  Checkpoint written
+2026-10-10 00:24:53 INFO  Mapping supplier part numbers to material master
+2026-10-10 00:25:05 INFO  Heartbeat sent to scheduler
+2026-10-10 00:28:07 ERROR Material 7165-509-X does not exist in plant DE01
+2026-10-10 00:29:59 INFO  2 of 528 IDocs in status 51
+2026-10-10 00:30:00 ERROR Job EDI_IDOC_INBOUND_DE01 ended with status CANCELLED, return code 12

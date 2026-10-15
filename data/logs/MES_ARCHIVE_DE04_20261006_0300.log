@@ -1,0 +1,10 @@
+2026-10-06 03:00:00 INFO  Job MES_ARCHIVE_DE04 started (run 63523, host batch03)
+2026-10-06 03:01:23 INFO  Selecting closed production orders older than 90 days
+2026-10-06 03:04:15 INFO  562 orders selected for archiving
+2026-10-06 03:04:42 INFO  Copying order headers to MES.ORDER_HISTORY
+2026-10-06 03:08:22 INFO  Commit interval set to 500 rows
+2026-10-06 03:09:04 WARN  Spool output truncated to 1000 lines
+2026-10-06 03:10:29 WARN  Deprecated parameter BATCH_SIZE ignored
+2026-10-06 03:12:15 ERROR Insert into MES.ORDER_HISTORY failed: tablespace MES_DATA is full
+2026-10-06 03:15:13 INFO  186 of 562 orders archived, transaction rolled back
+2026-10-06 03:17:20 ERROR Job MES_ARCHIVE_DE04 ended with status CANCELLED, return code 12

@@ -1,0 +1,122 @@
+[
+  {
+    "name": "FI_POST_DE01_NIGHTLY",
+    "plant": "DE01",
+    "system": "SAP S/4HANA",
+    "description": "Posts approved supplier invoices to the general ledger",
+    "schedule": "daily 01:30",
+    "owner_group": "L1 Batch Operations"
+  },
+  {
+    "name": "FI_POST_CZ01_NIGHTLY",
+    "plant": "CZ01",
+    "system": "SAP S/4HANA",
+    "description": "Posts approved supplier invoices to the general ledger",
+    "schedule": "daily 01:45",
+    "owner_group": "L1 Batch Operations"
+  },
+  {
+    "name": "SUPPLIER_ASN_IMPORT_DE02",
+    "plant": "DE02",
+    "system": "SFTP gateway",
+    "description": "Imports supplier advance shipping notices from SFTP",
+    "schedule": "daily 00:30",
+    "owner_group": "L1 Batch Operations"
+  },
+  {
+    "name": "SUPPLIER_PRICE_IMPORT_PL01",
+    "plant": "PL01",
+    "system": "SFTP gateway",
+    "description": "Imports supplier price lists from SFTP",
+    "schedule": "daily 00:45",
+    "owner_group": "L1 Batch Operations"
+  },
+  {
+    "name": "EDI_IDOC_INBOUND_DE01",
+    "plant": "DE01",
+    "system": "SAP S/4HANA",
+    "description": "Processes inbound supplier IDocs (shipping notifications)",
+    "schedule": "every 30 min",
+    "owner_group": "L1 Batch Operations"
+  },
+  {
+    "name": "EDI_IDOC_INBOUND_DE04",
+    "plant": "DE04",
+    "system": "SAP S/4HANA",
+    "description": "Processes inbound supplier IDocs (shipping notifications)",
+    "schedule": "every 30 min",
+    "owner_group": "L1 Batch Operations"
+  },
+  {
+    "name": "CO_SETTLEMENT_DE03",
+    "plant": "DE03",
+    "system": "SAP S/4HANA",
+    "description": "Settles production order costs",
+    "schedule": "daily 02:00",
+    "owner_group": "L1 Batch Operations"
+  },
+  {
+    "name": "MM_STOCK_REVAL_PL01",
+    "plant": "PL01",
+    "system": "SAP S/4HANA",
+    "description": "Revalues stock at standard price",
+    "schedule": "daily 02:15",
+    "owner_group": "L1 Batch Operations"
+  },
+  {
+    "name": "MRP_RUN_DE01",
+    "plant": "DE01",
+    "system": "SAP S/4HANA",
+    "description": "Material requirements planning for the plant",
+    "schedule": "daily 01:45",
+    "owner_group": "L1 Batch Operations"
+  },
+  {
+    "name": "MRP_RUN_CZ01",
+    "plant": "CZ01",
+    "system": "SAP S/4HANA",
+    "description": "Material requirements planning for the plant",
+    "schedule": "daily 01:45",
+    "owner_group": "L1 Batch Operations"
+  },
+  {
+    "name": "MES_ARCHIVE_DE02",
+    "plant": "DE02",
+    "system": "Plant MES",
+    "description": "Moves closed production orders to MES history",
+    "schedule": "daily 03:00",
+    "owner_group": "L1 Batch Operations"
+  },
+  {
+    "name": "MES_ARCHIVE_DE04",
+    "plant": "DE04",
+    "system": "Plant MES",
+    "description": "Moves closed production orders to MES history",
+    "schedule": "daily 03:00",
+    "owner_group": "L1 Batch Operations"
+  },
+  {
+    "name": "MES_ORDER_SYNC_DE02",
+    "plant": "DE02",
+    "system": "Plant MES",
+    "description": "Sends released production orders from SAP to MES",
+    "schedule": "hourly",
+    "owner_group": "L1 Batch Operations"
+  },
+  {
+    "name": "MES_CONFIRM_SYNC_CZ01",
+    "plant": "CZ01",
+    "system": "Plant MES",
+    "description": "Sends MES operation confirmations back to SAP",
+    "schedule": "hourly",
+    "owner_group": "L1 Batch Operations"
+  },
+  {
+    "name": "QM_CERT_EXPORT_DE03",
+    "plant": "DE03",
+    "system": "Azure data platform",
+    "description": "Exports signed quality certificates to the customer portal",
+    "schedule": "daily 04:00",
+    "owner_group": "L1 Batch Operations"
+  }
+]

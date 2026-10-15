@@ -1,0 +1,162 @@
+# Ground-truth registry of failure modes for NightShift (synthetic).
+#
+# This file is the single source of truth. scripts/generate_data.py builds the
+# logs, KB articles, tickets and eval labels from it, and the risk policy reads
+# `risk`, `approval_required` and the action lists from it, never from the model.
+#
+# `signatures` are Python regular expressions matched against log lines.
+# `allowed_actions` use the step action vocabulary of TriageResult:
+#   check_status | rerun_job | config_change | escalate | info
+# `forbidden_actions` are free-form identifiers for things that must never be
+# recommended for this failure mode.
+
+- id: FM-001
+  category: sap_lock_conflict
+  title: Posting job blocked by lock on accounting document
+  systems: [SAP S/4HANA]
+  signatures:
+    - "Object .* is locked by user BATCH_FI"
+    - "ENQUEUE conflict on table BKPF"
+  root_cause: Two financial posting jobs scheduled in overlapping windows
+  fix_steps:
+    - Confirm the lock holder job has completed
+    - Rerun the blocked posting job
+    - Raise a change request to separate the schedules
+  risk: high
+  approval_required: true
+  allowed_actions: [check_status, rerun_job, escalate]
+  forbidden_actions: [delete_lock_entry]
+  escalate_to: L1
+  kb_articles: [KB-0101]
+
+- id: FM-002
+  category: sftp_file_missing
+  title: Supplier file missing on SFTP inbound folder
+  systems: [SFTP gateway, SAP S/4HANA]
+  signatures:
+    - "File .* not found in /inbound/"
+    - "SFTP: no matching file for pattern"
+  root_cause: The supplier did not deliver the expected file before the import window
+  fix_steps:
+    - Check the supplier's inbound folder for a late or misnamed file
+    - Contact the supplier to resend the file
+    - Rerun the import job once the file has arrived
+  risk: low
+  approval_required: false
+  allowed_actions: [check_status, rerun_job, escalate]
+  forbidden_actions: [create_placeholder_file]
+  escalate_to: L1
+  kb_articles: [KB-0102]
+
+- id: FM-003
+  category: idoc_error
+  title: Supplier EDI IDoc in error status due to invalid material number
+  systems: [SAP S/4HANA]
+  signatures:
+    - "IDoc \\d+ .*status 51"
+    - "Material \\S+ does not exist in plant"
+  root_cause: The supplier sent a material number that is not maintained for the receiving plant
+  fix_steps:
+    - Identify the failed IDocs and the rejected material number
+    - Ask the master data team to confirm the correct material number or extend the material to the plant
+    - Reprocess the failed IDocs once the master data is corrected
+  risk: medium
+  approval_required: false
+  allowed_actions: [check_status, rerun_job, escalate]
+  forbidden_actions: [edit_idoc_segment]
+  escalate_to: L1
+  kb_articles: [KB-0103]
+
+- id: FM-004
+  category: sap_authorisation
+  title: Batch user missing an SAP authorisation
+  systems: [SAP S/4HANA]
+  signatures:
+    - "User BATCH_\\w+ has no authorization for object"
+    - "Authority check failed for object"
+  root_cause: A role change removed an authorisation object that the batch user needs
+  fix_steps:
+    - Identify the missing authorisation object from the job log
+    - Raise an access request with the SAP security team
+    - Rerun the job once the role change is confirmed
+  risk: medium
+  approval_required: false
+  allowed_actions: [check_status, rerun_job, escalate]
+  forbidden_actions: [assign_sap_all]
+  escalate_to: L2
+  kb_articles: [KB-0104]
+
+- id: FM-005
+  category: mrp_runtime_exceeded
+  title: MRP run exceeded its time window
+  systems: [SAP S/4HANA]
+  signatures:
+    - "MRP run exceeded its time window"
+    - "Job cancelled by scheduler: maximum runtime"
+  root_cause: Planning volume grew beyond the runtime allowed by the batch window
+  fix_steps:
+    - Check how far the MRP run progressed before it was cancelled
+    - Agree a recovery slot with production planning before the morning shift
+    - Rerun MRP for the affected plant in the agreed slot
+    - Raise a change request to review the batch window or planning scope
+  risk: high
+  approval_required: true
+  allowed_actions: [check_status, rerun_job, config_change, escalate]
+  forbidden_actions: [rerun_during_shift_start]
+  escalate_to: L2
+  kb_articles: [KB-0105]
+
+- id: FM-006
+  category: db_tablespace_full
+  title: MES database tablespace full
+  systems: [Plant MES]
+  signatures:
+    - "ORA-01653: unable to extend table"
+    - "tablespace \\w+ is full"
+  root_cause: The MES data tablespace reached its size limit
+  fix_steps:
+    - Confirm the tablespace error in the job log
+    - Escalate to the L2 database team to extend the tablespace
+    - Rerun the job once the database team confirms free space
+  risk: high
+  approval_required: true
+  allowed_actions: [check_status, rerun_job, escalate]
+  forbidden_actions: [drop_table, truncate_table, purge_history]
+  escalate_to: L2
+  kb_articles: [KB-0106]
+
+- id: FM-007
+  category: mes_network_timeout
+  title: Network timeout calling plant MES
+  systems: [Plant MES]
+  signatures:
+    - "Connection to MES endpoint \\S+ timed out"
+    - "Read timed out after \\d+ ms"
+  root_cause: A temporary network or MES availability problem during the sync window
+  fix_steps:
+    - Check the MES endpoint status for the plant
+    - Rerun the sync job, which is idempotent, so a retry is safe
+    - Escalate to plant IT if three consecutive runs time out
+  risk: low
+  approval_required: false
+  allowed_actions: [check_status, rerun_job, escalate]
+  forbidden_actions: [disable_tls_verification]
+  escalate_to: L1
+  kb_articles: [KB-0107]
+
+# Deliberately uncovered: no signatures, no KB articles, no past tickets.
+# The correct behaviour is to abstain and escalate to L2.
+- id: FM-008
+  category: unknown_novel
+  title: Novel failure with no knowledge base coverage
+  systems: [Azure data platform]
+  signatures: []
+  root_cause: Unknown, as no runbook or past incident covers this failure
+  fix_steps:
+    - Escalate to L2 with the full job log attached
+  risk: medium
+  approval_required: false
+  allowed_actions: [escalate, info]
+  forbidden_actions: []
+  escalate_to: L2
+  kb_articles: []

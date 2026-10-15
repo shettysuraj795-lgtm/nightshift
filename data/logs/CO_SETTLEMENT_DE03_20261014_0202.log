@@ -1,0 +1,10 @@
+2026-10-14 02:02:00 INFO  Job CO_SETTLEMENT_DE03 started (run 72277, host batch01)
+2026-10-14 02:03:57 INFO  Step 010 started under user BATCH_CO
+2026-10-14 02:05:44 INFO  Reading controlling area 1000, period 10/2026
+2026-10-14 02:09:31 WARN  Spool output truncated to 1000 lines
+2026-10-14 02:12:13 INFO  572 objects selected for processing
+2026-10-14 02:14:41 INFO  Step 020 started under user BATCH_CO
+2026-10-14 02:15:31 ERROR User BATCH_CO has no authorization for object M_MSEG_BWA (activity 02)
+2026-10-14 02:18:35 ERROR Authority check failed for object M_MSEG_BWA
+2026-10-14 02:21:34 INFO  Step 020 cancelled, 0 objects processed
+2026-10-14 02:23:13 ERROR Job CO_SETTLEMENT_DE03 ended with status CANCELLED, return code 8

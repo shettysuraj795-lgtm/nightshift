@@ -1,0 +1,9 @@
+2026-10-06 02:01:00 INFO  Job CO_SETTLEMENT_DE03 started (run 42411, host batch02)
+2026-10-06 02:04:35 INFO  Step 010 started under user BATCH_CO
+2026-10-06 02:04:41 INFO  Reading controlling area 1000, period 10/2026
+2026-10-06 02:07:21 WARN  Deprecated parameter BATCH_SIZE ignored
+2026-10-06 02:08:01 INFO  386 objects selected for processing
+2026-10-06 02:09:03 INFO  Step 020 started under user BATCH_CO
+2026-10-06 02:09:36 ERROR User BATCH_CO has no authorization for object M_MATE_WRK (activity 03)
+2026-10-06 02:11:38 INFO  Step 020 cancelled, 0 objects processed
+2026-10-06 02:14:30 ERROR Job CO_SETTLEMENT_DE03 ended with status CANCELLED, return code 8

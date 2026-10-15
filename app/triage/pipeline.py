@@ -25,7 +25,7 @@ from app.config import Settings, get_settings
 from app.guardrails.abstention import ESCALATION_STEP, abstention_reasons
 from app.guardrails.actions import check_steps
 from app.guardrails.citations import validate_citations
-from app.guardrails.injection import find_injection_lines, is_tainted, wrap_untrusted
+from app.guardrails.injection import find_injection_lines, injected_identifiers, is_tainted, wrap_untrusted
 from app.guardrails.redaction import Redactor
 from app.llm.openrouter import LLMResponse, OpenRouterProvider
 from app.policy import UNKNOWN_CATEGORY, decide, mode_for_category
@@ -230,6 +230,8 @@ class TriagePipeline:
         failure_id: str,
         draft: TriageDraft,
         retrieved: list[RetrievedDoc],
+        matches: list[SignatureMatch],
+        log_text: str,
         flagged_lines: list[str],
         events: list[str],
         mode: str,
@@ -239,19 +241,26 @@ class TriagePipeline:
         events = list(events)
         kb_scores = [d.score for d in retrieved if d.collection == "kb"]
 
-        # 1. Remove anything that quotes the injected instruction.
-        evidence = [e for e in draft.evidence if not is_tainted(e, flagged_lines)]
-        steps = [s for s in draft.steps if not is_tainted(s.text, flagged_lines)]
+        # 1. Remove anything that repeats the injected instruction.
+        trusted_text = "\n".join([line for line in log_text.splitlines() if line not in flagged_lines] + [d.text for d in retrieved])
+        identifiers = injected_identifiers(flagged_lines, trusted_text)
+        evidence = [e for e in draft.evidence if not is_tainted(e, flagged_lines, identifiers)]
+        steps = [s for s in draft.steps if not is_tainted(s.text, flagged_lines, identifiers)]
         removed = len(draft.evidence) - len(evidence) + len(draft.steps) - len(steps)
         if removed:
             events.append(f"injected_text_removed:{removed}")
-        root_cause_tainted = is_tainted(draft.root_cause, flagged_lines)
+        root_cause_tainted = is_tainted(draft.root_cause, flagged_lines, identifiers)
 
-        # 2. Category must be a known registry category.
+        # 2. Category must be a known registry category, and must agree with
+        #    the deterministic signature matcher when it found something.
         known_categories = {m.category for m in self.modes}
         category = draft.category if draft.category in known_categories else UNKNOWN_CATEGORY
         if category != draft.category:
             events.append("unknown_category_replaced")
+        signature_categories = [m.category for m in matches]
+        agrees = not signature_categories or category in signature_categories
+        if not agrees:
+            events.append(f"category_disagrees_with_signature:{signature_categories[0]}")
 
         # 3. Steps must be allowed for this failure mode and never forbidden.
         step_check = check_steps(steps, mode_for_category(category, self.modes))
@@ -270,6 +279,7 @@ class TriagePipeline:
             confidence=draft.confidence,
             model_escalated=draft.escalate,
             known_category=category != UNKNOWN_CATEGORY,
+            agrees_with_signatures=agrees,
             steps_left=len(steps),
             min_retrieval_score=self.settings.abstain_min_retrieval_score,
             min_confidence=self.settings.abstain_min_confidence,
@@ -282,8 +292,9 @@ class TriagePipeline:
             steps = [ESCALATION_STEP]
             events.append("abstained")
 
-        # 6. Risk and approval come from the registry, never from the model.
-        decision = decide(category, steps, self.modes)
+        # 6. Risk and approval come from the registry, never from the model;
+        #    the strictest of the chosen category and any signature match.
+        decision = decide(category, steps, self.modes, signature_categories)
         if decision.risk != draft.risk:
             events.append(f"policy_override:risk={draft.risk}->{decision.risk}")
         if decision.approval_required != draft.approval_required:
@@ -333,7 +344,7 @@ class TriagePipeline:
             draft = degraded_draft(matches, kb_docs, self.modes, self.settings)
             mode, model_used = "degraded", DEGRADED_MODEL_NAME
 
-        return self.finalise(failure_id, draft, kb_docs + ticket_docs, flagged, events, mode, model_used)
+        return self.finalise(failure_id, draft, kb_docs + ticket_docs, matches, log, flagged, events, mode, model_used)
 
     def run(self, failure_id: str) -> TriageResult:
         """Triage one failure from last night's queue."""

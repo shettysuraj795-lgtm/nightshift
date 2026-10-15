@@ -1,9 +1,10 @@
 """Risk policy. The model advises, code decides.
 
-`risk` and `approval_required` come from the registry entry for the result's
-category, never from the model, so the model can never lower risk or remove
-an approval. Any step that reruns a job or changes configuration also
-requires approval, whatever the registry risk.
+`risk` and `approval_required` come from the registry, never from the model.
+The model also cannot lower risk by choosing a milder category: if the
+deterministic signature matcher found other failure modes in the log, the
+strictest of all of them applies. Any step that reruns a job or changes
+configuration requires approval, whatever the registry risk.
 """
 
 from dataclasses import dataclass
@@ -13,6 +14,7 @@ from app.schemas import Step
 
 UNKNOWN_CATEGORY = "unknown_novel"  # the registry's catch-all mode (FM-008)
 ACTIONS_NEEDING_APPROVAL = {"rerun_job", "config_change"}
+RISK_ORDER: dict[Risk, int] = {"low": 0, "medium": 1, "high": 2}
 
 
 @dataclass(frozen=True)
@@ -27,7 +29,13 @@ def mode_for_category(category: str, modes: list[FailureMode]) -> FailureMode:
     return by_category.get(category, by_category[UNKNOWN_CATEGORY])
 
 
-def decide(category: str, steps: list[Step], modes: list[FailureMode]) -> PolicyDecision:
-    mode = mode_for_category(category, modes)
-    needs_approval = mode.approval_required or any(s.action in ACTIONS_NEEDING_APPROVAL for s in steps)
-    return PolicyDecision(risk=mode.risk, approval_required=needs_approval)
+def decide(
+    category: str,
+    steps: list[Step],
+    modes: list[FailureMode],
+    signature_categories: list[str] | None = None,
+) -> PolicyDecision:
+    relevant = [mode_for_category(c, modes) for c in [category, *(signature_categories or [])]]
+    risk = max((m.risk for m in relevant), key=RISK_ORDER.__getitem__)
+    needs_approval = any(m.approval_required for m in relevant) or any(s.action in ACTIONS_NEEDING_APPROVAL for s in steps)
+    return PolicyDecision(risk=risk, approval_required=needs_approval)

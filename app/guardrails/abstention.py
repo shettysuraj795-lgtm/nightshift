@@ -18,6 +18,7 @@ def abstention_reasons(
     confidence: float,
     model_escalated: bool,
     known_category: bool,
+    agrees_with_signatures: bool,
     steps_left: int,
     min_retrieval_score: float,
     min_confidence: float,
@@ -28,6 +29,8 @@ def abstention_reasons(
         reasons.append("the model judged the evidence insufficient")
     if not known_category:
         reasons.append("the failure does not match any known failure mode")
+    if not agrees_with_signatures:
+        reasons.append("the diagnosis disagrees with the known error signature in the log")
     if top_retrieval_score is None or top_retrieval_score < min_retrieval_score:
         reasons.append("no knowledge base article is a close match")
     if valid_citations == 0:

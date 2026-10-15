@@ -28,12 +28,15 @@ class CitationCheck:
 
 def validate_citations(citations: list[Citation], retrieved: list[RetrievedDoc]) -> CitationCheck:
     texts: dict[str, list[str]] = {}
+    titles: dict[str, str] = {}
     for doc in retrieved:
         texts.setdefault(doc.doc_id, []).append(normalise(doc.text))
+        titles.setdefault(doc.doc_id, doc.title)
 
     valid = []
     for citation in citations:
         excerpt = normalise(citation.excerpt)
         if excerpt and any(excerpt in text for text in texts.get(citation.doc_id, [])):
-            valid.append(citation)
+            # The title comes from the source, not the model, so it cannot carry injected text.
+            valid.append(Citation(doc_id=citation.doc_id, title=titles[citation.doc_id], excerpt=citation.excerpt))
     return CitationCheck(valid=valid, dropped=len(citations) - len(valid))

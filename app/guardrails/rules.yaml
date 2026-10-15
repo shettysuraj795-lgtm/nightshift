@@ -15,7 +15,8 @@ injection_patterns:
 # (tests/test_guardrails.py checks this).
 forbidden_action_patterns:
   delete_lock_entry:
-    - "\\b(?:delet|remov|clear|drop|releas)\\w*\\b.*\\block"
+    - "\\b(?:delet|remov|clear|drop|releas)\\w*\\b.*\\b(?:lock|enqueue)"
+    - "\\bunlock\\w*"
     - "\\bSM12\\b"
   create_placeholder_file:
     - "\\b(?:creat|upload|plac|add)\\w*\\b.*\\b(?:placeholder|dummy|empty|fake)\\b.*\\bfile"
@@ -34,5 +35,20 @@ forbidden_action_patterns:
   disable_tls_verification:
     - "\\bdisabl\\w*\\b.*\\b(?:certificate|tls|ssl)"
 
-# A step that only warns against something ("Do not ...") is not a recommendation.
-negation_pattern: "\\b(?:do not|don't|never|must not|should not|avoid)\\b"
+# A clause that starts with a warning ("Do not ...", "Never ...") is not a
+# recommendation. Steps are split into clauses first, so "Do not wait; delete
+# the lock entry" is still caught, and a warning word later in a clause
+# ("Delete the lock entry to avoid ...") does not excuse it.
+clause_separator: "[.;:!?]|,\\s*(?:but|then|and then)\\b|\\s[-–—]\\s"
+negation_start: "^\\s*(?:do not|don't|never|must not|should not|avoid)\\b"
+
+# What a step's text says it does, whatever action tag the model put on it.
+# The stricter of the tag and the text wins, so a rerun labelled "info" is
+# still treated as a rerun. Checked only in clauses that are not warnings.
+action_text_patterns:
+  rerun_job:
+    - "\\b(?:re-?run|reprocess|restart|re-?trigger|resubmit|retry|re-?start)\\w*"
+  config_change:
+    # Only when the clause starts with the verb: "Raise a change request" is
+    # an escalation, not a change (decision 2026-10-15).
+    - "^\\s*(?:change|modify|update|edit|extend|assign|increase|add|set|grant)\\b"

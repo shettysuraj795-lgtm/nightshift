@@ -19,7 +19,8 @@ DEFAULT_NAMES_PATH = Path(__file__).resolve().parent.parent.parent / "data" / "p
 # Order matters: emails first, so the parts of an address are not matched again.
 PATTERNS: list[tuple[str, str]] = [
     ("EMAIL", r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+"),
-    ("PHONE", r"\+\d{1,3}(?:[ -]\d{1,4}){2,5}\b"),
+    # International format only, with a + or 00 prefix: "+49 711 555 0142", "0049 89 1234567".
+    ("PHONE", r"(?:\+|\b00)\d{1,3}(?:[ -]\d{1,8}){1,5}\b"),
     ("EMPLOYEE_ID", r"\bEMP-\d{5}\b"),
 ]
 
@@ -42,7 +43,9 @@ class Redactor:
         if names:
             # Longest names first, so "Anna Maria Berger" wins over "Anna Maria".
             alternatives = "|".join(re.escape(n) for n in sorted(names, key=len, reverse=True))
-            patterns.append(("PERSON", rf"\b(?:{alternatives})\b"))
+            # Case-insensitive, so "MARKUS WEBER" is caught too. Reordered names
+            # ("Weber, Markus") are not: a known limitation of a list-based approach.
+            patterns.append(("PERSON", rf"(?i:\b(?:{alternatives})\b)"))
         self.patterns = [(kind, re.compile(pattern)) for kind, pattern in patterns]
 
     @classmethod

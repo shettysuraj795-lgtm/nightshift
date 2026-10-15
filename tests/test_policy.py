@@ -47,3 +47,21 @@ def test_model_cannot_lower_risk_or_remove_approval() -> None:
     assert "policy_override:risk=low->high" in result.guardrail_events
     assert "policy_override:approval_required=false->true" in result.guardrail_events
     assert KB_HIT.doc_id in [c.doc_id for c in result.citations]
+
+
+def test_signature_matches_raise_risk_to_the_strictest() -> None:
+    decision = decide("mes_network_timeout", [CHECK], REGISTRY, signature_categories=["sap_lock_conflict"])
+    assert decision.risk == "high" and decision.approval_required
+
+
+def test_model_cannot_lower_risk_by_choosing_a_milder_category() -> None:
+    """Review finding: on the S2 log the model claims a low-risk MES timeout."""
+    wrong = VALID_DRAFT | {"category": "mes_network_timeout", "risk": "low", "approval_required": False}
+    pipeline = TriagePipeline(llm=FakeLLM(json.dumps(wrong)), retriever=FakeRetriever(), modes=REGISTRY,
+                              settings=Settings(_env_file=None, triage_model="test"))
+    result = pipeline.run_log("S2", LOCK_LOG)
+
+    assert result.escalate
+    assert result.risk == "high" and result.approval_required
+    assert "category_disagrees_with_signature:sap_lock_conflict" in result.guardrail_events
+    assert [s.action for s in result.steps] == ["escalate"]

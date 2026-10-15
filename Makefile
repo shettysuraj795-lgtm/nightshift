@@ -17,8 +17,8 @@ ui:  ## Run the Streamlit UI on :8501
 data:  ## Regenerate synthetic data from data/registry.yaml (seed 42)
 	PYTHONPATH=. uv run python scripts/generate_data.py --seed 42
 
-ingest:  ## Embed the KB and tickets into Qdrant (Phase 2)
-	@echo "Not implemented until Phase 2." && exit 1
+ingest:  ## Embed the KB and tickets into Qdrant (needs make infra-up)
+	PYTHONPATH=. uv run python scripts/ingest.py
 
 test:  ## Run the unit tests
 	uv run pytest

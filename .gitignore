@@ -18,3 +18,6 @@ __pycache__/
 
 # Browser automation output
 .playwright-mcp/
+
+# Downloaded embedding models
+.cache/

@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     enrich_model: str = ""
     judge_model: str = ""
     llm_timeout_seconds: float = 30.0
+    llm_temperature: float = 0.0
+    llm_max_tokens: int = 2000
+    triage_prompt: str = "triage_v1"
+    # Degraded mode: a regex match identifies the category but cannot confirm
+    # the root cause, so the result reports this fixed, modest confidence.
+    degraded_confidence: float = 0.5
 
     # Local fallback LLM.
     ollama_base_url: str = "http://localhost:11434"
@@ -33,6 +39,14 @@ class Settings(BaseSettings):
     qdrant_url: str = "http://localhost:6333"
     phoenix_url: str = "http://localhost:6006"
     phoenix_collector_endpoint: str = "http://localhost:4317"
+
+    # Retrieval.
+    embedding_model: str = "BAAI/bge-small-en-v1.5"
+    embedding_cache_dir: str = ".cache/fastembed"
+    retrieval_kb_top_k: int = 5
+    retrieval_ticket_top_k: int = 3
+    # Hits below this cosine similarity are ignored.
+    retrieval_min_score: float = 0.5
 
     # Where the UI finds the API.
     api_base_url: str = "http://localhost:8000"

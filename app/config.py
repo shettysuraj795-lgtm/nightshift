@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     triage_model: str = ""
     enrich_model: str = ""
     judge_model: str = ""
+    # The judge only answers yes/no with reasons; extended reasoning made it ~5x
+    # slower and costlier with the same verdicts in testing, so it is off by default.
+    judge_reasoning: bool = False
     llm_timeout_seconds: float = 30.0
     # Retries per provider on timeouts, 429 and 5xx, with exponential backoff and jitter.
     llm_retries: int = Field(default=2, ge=0)

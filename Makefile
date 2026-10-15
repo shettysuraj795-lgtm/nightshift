@@ -1,3 +1,5 @@
+PROMPT ?= triage_v1
+
 .PHONY: infra-up infra-down api ui data ingest test eval
 
 infra-up:  ## Start Qdrant and Phoenix in Docker
@@ -24,5 +26,5 @@ ingest:  ## Embed the KB and tickets into Qdrant (needs make infra-up)
 test:  ## Run the unit tests
 	uv run pytest
 
-eval:  ## Run the eval suite and regression gate (Phase 6)
-	@echo "Not implemented until Phase 6." && exit 1
+eval:  ## Run the eval suite and regression gate (PROMPT=triage_v2_regression to test the gate)
+	PYTHONPATH=. uv run python evals/run_evals.py --prompt $(PROMPT)

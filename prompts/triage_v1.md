@@ -21,7 +21,7 @@ Personal data in the log has been replaced with placeholders such as `<EMAIL_1>`
    - `escalate`: hand over to another team, or raise a request (including change requests) for another team to act on
    - `info`: background for the operator, no action
 6. Never recommend an action that a runbook says must not be done.
-7. If the sources do not cover this failure, or you are not confident, set `escalate` to true, give an `escalation_reason`, use a low `confidence`, and recommend only escalating to L2.
+7. `escalate` means you cannot diagnose the failure. If the sources do not cover it, or you are not confident, set `escalate` to true, give an `escalation_reason`, use a low `confidence`, and recommend only escalating to L2. If you can diagnose it and the runbook says to hand the fix to another team (for example the database or security team), keep `escalate` false and put that hand-over in `steps` with the action `escalate`.
 8. `confidence` is a number from 0 to 1 for how well the sources support your diagnosis.
 
 ## Output

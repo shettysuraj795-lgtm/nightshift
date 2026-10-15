@@ -203,6 +203,12 @@ class RunContext:
     events: list[str] = field(default_factory=list)
 
 
+# Called with the answer before guardrails and policy, the run's context, and
+# the model response (None in degraded mode). Used by the evals to measure what
+# the model itself produced, e.g. citation validity before invalid ones are dropped.
+DraftHook = Callable[[TriageDraft, RunContext, LLMResponse | None], None]
+
+
 class TriagePipeline:
     """Runs one triage. Dependencies can be injected, which keeps tests offline."""
 
@@ -365,11 +371,17 @@ class TriagePipeline:
             trace_id=current_trace_id(),
         )
 
-    def run_log(self, failure_id: str, log_text: str, prompt_hook: PromptHook | None = None) -> TriageResult:
+    def run_log(
+        self,
+        failure_id: str,
+        log_text: str,
+        prompt_hook: PromptHook | None = None,
+        draft_hook: DraftHook | None = None,
+    ) -> TriageResult:
         """Triage a log directly (also used by the evals). One call is one trace."""
         with tracer.start_as_current_span("triage") as span:
             span.set_attributes({"openinference.span.kind": "CHAIN", "failure_id": failure_id, "input.value": failure_id})
-            result = self._run(failure_id, log_text, prompt_hook)
+            result = self._run(failure_id, log_text, prompt_hook, draft_hook)
             span.set_attributes({
                 "category": result.category,
                 "risk": result.risk,
@@ -384,7 +396,7 @@ class TriagePipeline:
             })
             return result
 
-    def _run(self, failure_id: str, log_text: str, prompt_hook: PromptHook | None) -> TriageResult:
+    def _run(self, failure_id: str, log_text: str, prompt_hook: PromptHook | None, draft_hook: DraftHook | None) -> TriageResult:
         # Redact first: nothing below, including the trace, ever sees the original personal data.
         with tracer.start_as_current_span("redact") as span:
             redaction = self.redactor.redact(log_text)
@@ -420,6 +432,8 @@ class TriagePipeline:
                 })
         if not ctx.kb_available:
             draft = degraded_draft(ctx.matches, [], self.modes, self.settings)
+            if draft_hook:
+                draft_hook(draft, ctx, None)
             return self.finalise(ctx, draft, "degraded", DEGRADED_MODEL_NAME, fallback_used=False)
         ctx.retrieved = kb_docs + ticket_docs
 
@@ -434,8 +448,12 @@ class TriagePipeline:
             reason = "invalid_output_after_repair" if isinstance(error, ValidationError) else "llm_unavailable"
             ctx.events.append(reason)
             draft = degraded_draft(ctx.matches, kb_docs, self.modes, self.settings)
+            if draft_hook:
+                draft_hook(draft, ctx, None)
             return self.finalise(ctx, draft, "degraded", DEGRADED_MODEL_NAME, fallback_used=False)
 
+        if draft_hook:
+            draft_hook(draft, ctx, response)
         return self.finalise(ctx, draft, "full", response.model, response.fallback_used)
 
     def run(self, failure_id: str) -> TriageResult:

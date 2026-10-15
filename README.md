@@ -89,7 +89,7 @@ The **Demo controls** in the sidebar simulate outages:
 - **Simulate all AI models down:** NightShift gives a rule-based answer.
 - **Simulate knowledge base outage:** NightShift answers without retrieving any sources.
 
-**Reset demo** clears all three.
+**Reset demo** turns all three off and clears the results and approvals.
 
 | S1 answered by the backup model | S2 approval dialog | S3 redaction and injection |
 |---|---|---|

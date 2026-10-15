@@ -38,7 +38,7 @@ BANNER = {"info": st.info, "success": st.success, "warning": st.warning, "error"
 st.markdown(
     """
     <style>
-      .block-container { padding-top: 1.6rem; max-width: 1440px; }
+      .block-container { padding-top: 4.2rem; max-width: 1440px; }
       /* Streamlit styles markdown paragraphs itself, so these use divs and win with !important. */
       div.ns-title { font-size: 2.1rem !important; font-weight: 750; letter-spacing: -0.02em; line-height: 1.1; }
       div.ns-subtitle { color: #4B5563; font-size: 1.02rem; margin-top: 0.25rem; }
@@ -113,7 +113,7 @@ st.session_state.setdefault("errors", {})  # failure ID -> error name from the l
 # --- Header ---------------------------------------------------------------------
 
 st.markdown(
-    '<div class="ns-title">NightShift</div>'
+    '<div class="ns-title">🌙 NightShift</div>'
     '<div class="ns-subtitle">Overnight job triage · Nordwerk Antriebstechnik (pilot)</div>'
     '<span class="ns-demo">Demo environment · synthetic data</span>',
     unsafe_allow_html=True,

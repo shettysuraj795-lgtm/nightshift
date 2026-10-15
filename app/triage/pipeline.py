@@ -15,6 +15,7 @@ import logging
 import re
 import uuid
 from collections.abc import Callable
+from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 from typing import Protocol
@@ -27,7 +28,10 @@ from app.guardrails.actions import check_steps
 from app.guardrails.citations import validate_citations
 from app.guardrails.injection import find_injection_lines, injected_identifiers, is_tainted, wrap_untrusted
 from app.guardrails.redaction import Redactor
-from app.llm.openrouter import LLMResponse, OpenRouterProvider
+from app.llm.client import LLMResponse
+from app.llm.fallback import FallbackChain
+from app.llm.ollama import ollama_provider
+from app.llm.openrouter import openrouter_provider
 from app.policy import UNKNOWN_CATEGORY, decide, mode_for_category
 from app.registry import Action, FailureMode, load_registry
 from app.retrieval.store import RetrievedDoc, Retriever
@@ -182,6 +186,19 @@ def degraded_draft(
 # --- Pipeline ---------------------------------------------------------------
 
 
+@dataclass
+class RunContext:
+    """What one triage run knows before the model answers; shared by both answer paths."""
+
+    failure_id: str
+    log_text: str  # already redacted
+    flagged_lines: list[str]  # suspected injection
+    matches: list[SignatureMatch]
+    retrieved: list[RetrievedDoc] = field(default_factory=list)
+    kb_available: bool = True
+    events: list[str] = field(default_factory=list)
+
+
 class TriagePipeline:
     """Runs one triage. Dependencies can be injected, which keeps tests offline."""
 
@@ -195,7 +212,8 @@ class TriagePipeline:
         redactor: Redactor | None = None,
     ) -> None:
         self.settings = settings or get_settings()
-        self.llm = llm or OpenRouterProvider(self.settings.triage_model, self.settings)
+        # OpenRouter first, the local Ollama model as fallback.
+        self.llm = llm or FallbackChain([openrouter_provider(self.settings), ollama_provider(self.settings)], self.settings)
         self.retriever = retriever or Retriever(self.settings)
         self.modes = modes or load_registry()
         self.system_prompt = load_prompt(prompt_name or self.settings.triage_prompt)
@@ -225,24 +243,14 @@ class TriagePipeline:
             response = self._call(repair, prompt_hook)
             return parse_draft(response.text), response
 
-    def finalise(
-        self,
-        failure_id: str,
-        draft: TriageDraft,
-        retrieved: list[RetrievedDoc],
-        matches: list[SignatureMatch],
-        log_text: str,
-        flagged_lines: list[str],
-        events: list[str],
-        mode: str,
-        model_used: str,
-    ) -> TriageResult:
+    def finalise(self, ctx: RunContext, draft: TriageDraft, mode: str, model_used: str, fallback_used: bool) -> TriageResult:
         """Output guardrails, abstention and policy: turns any draft into a safe result."""
-        events = list(events)
+        events = list(ctx.events)
+        flagged_lines, retrieved = ctx.flagged_lines, ctx.retrieved
         kb_scores = [d.score for d in retrieved if d.collection == "kb"]
 
         # 1. Remove anything that repeats the injected instruction.
-        trusted_text = "\n".join([line for line in log_text.splitlines() if line not in flagged_lines] + [d.text for d in retrieved])
+        trusted_text = "\n".join([line for line in ctx.log_text.splitlines() if line not in flagged_lines] + [d.text for d in retrieved])
         identifiers = injected_identifiers(flagged_lines, trusted_text)
         evidence = [e for e in draft.evidence if not is_tainted(e, flagged_lines, identifiers)]
         steps = [s for s in draft.steps if not is_tainted(s.text, flagged_lines, identifiers)]
@@ -257,7 +265,7 @@ class TriagePipeline:
         category = draft.category if draft.category in known_categories else UNKNOWN_CATEGORY
         if category != draft.category:
             events.append("unknown_category_replaced")
-        signature_categories = [m.category for m in matches]
+        signature_categories = [m.category for m in ctx.matches]
         agrees = not signature_categories or category in signature_categories
         if not agrees:
             events.append(f"category_disagrees_with_signature:{signature_categories[0]}")
@@ -272,10 +280,11 @@ class TriagePipeline:
         if citation_check.dropped:
             events.append(f"citations_dropped:{citation_check.dropped}")
 
-        # 5. Abstain when the evidence is weak.
+        # 5. Abstain when the evidence is weak. With the knowledge base down,
+        #    retrieval and citations cannot be judged, so those checks are skipped.
         reasons = abstention_reasons(
-            top_retrieval_score=max(kb_scores, default=None),
-            valid_citations=len(citation_check.valid),
+            top_retrieval_score=max(kb_scores, default=None) if ctx.kb_available else 1.0,
+            valid_citations=len(citation_check.valid) if ctx.kb_available else 1,
             confidence=draft.confidence,
             model_escalated=draft.escalate,
             known_category=category != UNKNOWN_CATEGORY,
@@ -301,7 +310,7 @@ class TriagePipeline:
             events.append(f"policy_override:approval_required={str(draft.approval_required).lower()}->{str(decision.approval_required).lower()}")
 
         return TriageResult(
-            failure_id=failure_id,
+            failure_id=ctx.failure_id,
             category=category,
             root_cause=root_cause,
             confidence=draft.confidence,
@@ -314,7 +323,7 @@ class TriagePipeline:
             escalation_reason=("Not enough evidence to recommend a fix: " + "; ".join(reasons) + ". Escalate to L2.") if reasons else None,
             mode=mode,
             model_used=model_used,
-            fallback_used=False,
+            fallback_used=fallback_used,
             guardrail_events=events,
             trace_id=uuid.uuid4().hex,
         )
@@ -330,21 +339,30 @@ class TriagePipeline:
         if flagged:
             events.append(f"injection_detected:lines={len(flagged)}")
 
-        matches = match_signatures(log, self.modes)
-        kb_docs, ticket_docs = self.retrieve(log)
+        ctx = RunContext(failure_id, log, flagged, match_signatures(log, self.modes), events=events)
+
+        try:
+            kb_docs, ticket_docs = self.retrieve(log)
+        except Exception:  # Qdrant down or unreachable: answer from the signatures alone, quickly
+            logger.exception("Knowledge base unavailable for %s", failure_id)
+            ctx.kb_available = False
+            ctx.events.append("knowledge_base_unavailable")
+            draft = degraded_draft(ctx.matches, [], self.modes, self.settings)
+            return self.finalise(ctx, draft, "degraded", DEGRADED_MODEL_NAME, fallback_used=False)
+        ctx.retrieved = kb_docs + ticket_docs
+
         messages = [
             {"role": "system", "content": self.system_prompt},
-            {"role": "user", "content": build_user_message(log, matches, kb_docs + ticket_docs, self.modes)},
+            {"role": "user", "content": build_user_message(log, ctx.matches, ctx.retrieved, self.modes)},
         ]
         try:
             draft, response = self.generate(messages, prompt_hook)
-            mode, model_used = "full", response.model
-        except Exception:  # invalid twice, timeout, HTTP error: fall back to rules
+        except Exception:  # all providers failed, or invalid output twice: fall back to rules
             logger.exception("Model answer unavailable for %s, using degraded mode", failure_id)
-            draft = degraded_draft(matches, kb_docs, self.modes, self.settings)
-            mode, model_used = "degraded", DEGRADED_MODEL_NAME
+            draft = degraded_draft(ctx.matches, kb_docs, self.modes, self.settings)
+            return self.finalise(ctx, draft, "degraded", DEGRADED_MODEL_NAME, fallback_used=False)
 
-        return self.finalise(failure_id, draft, kb_docs + ticket_docs, matches, log, flagged, events, mode, model_used)
+        return self.finalise(ctx, draft, "full", response.model, response.fallback_used)
 
     def run(self, failure_id: str) -> TriageResult:
         """Triage one failure from last night's queue."""

@@ -13,6 +13,7 @@ from fastembed import TextEmbedding
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, FieldCondition, Filter, MatchValue, PointStruct, VectorParams
 
+from app.chaos import check_vector_db
 from app.config import Settings, get_settings
 from app.retrieval.documents import Chunk
 
@@ -38,7 +39,8 @@ class Retriever:
 
     def __init__(self, settings: Settings | None = None) -> None:
         self.settings = settings or get_settings()
-        self.client = QdrantClient(url=self.settings.qdrant_url, timeout=5)
+        # Short timeout: if Qdrant is down, the pipeline should degrade quickly, not hang.
+        self.client = QdrantClient(url=self.settings.qdrant_url, timeout=self.settings.qdrant_timeout_seconds)
 
     @cached_property
     def embedder(self) -> TextEmbedding:
@@ -67,6 +69,7 @@ class Retriever:
     # --- Search -----------------------------------------------------------
 
     def _search(self, collection: str, vector: list[float], limit: int, query_filter: Filter | None) -> list[RetrievedDoc]:
+        check_vector_db()  # chaos flag: fail as if Qdrant were unreachable
         response = self.client.query_points(
             collection, query=vector, limit=limit, query_filter=query_filter,
             score_threshold=self.settings.retrieval_min_score, with_payload=True,

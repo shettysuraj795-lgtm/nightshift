@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     enrich_model: str = ""
     judge_model: str = ""
     llm_timeout_seconds: float = 30.0
+    # Retries per provider on timeouts, 429 and 5xx, with exponential backoff and jitter.
+    llm_retries: int = 2
+    llm_backoff_initial_seconds: float = 0.5
+    llm_backoff_max_seconds: float = 4.0
     llm_temperature: float = 0.0
     llm_max_tokens: int = 2000
     triage_prompt: str = "triage_v1"
@@ -38,9 +42,12 @@ class Settings(BaseSettings):
     # Local fallback LLM.
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "qwen2.5:3b"
+    # A small local model is slower than the hosted one, so it gets more time.
+    ollama_timeout_seconds: float = 60.0
 
     # Infrastructure.
     qdrant_url: str = "http://localhost:6333"
+    qdrant_timeout_seconds: int = 2  # the Qdrant client takes whole seconds
     phoenix_url: str = "http://localhost:6006"
     phoenix_collector_endpoint: str = "http://localhost:4317"
 
@@ -51,6 +58,11 @@ class Settings(BaseSettings):
     retrieval_ticket_top_k: int = 3
     # Hits below this cosine similarity are ignored.
     retrieval_min_score: float = 0.5
+
+    # Chaos flags at start-up (can be changed at runtime via POST /admin/chaos).
+    chaos_llm_down: bool = False
+    chaos_all_llms_down: bool = False
+    chaos_vector_db_down: bool = False
 
     # Where the UI finds the API.
     api_base_url: str = "http://localhost:8000"

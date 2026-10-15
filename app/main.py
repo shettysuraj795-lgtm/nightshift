@@ -2,6 +2,7 @@
 
 from fastapi import FastAPI, HTTPException
 
+from app.chaos import ChaosFlags, ChaosUpdate, get_flags, update_flags
 from app.schemas import Failure, FailureDetail, TriageResult
 from app.triage.pipeline import get_failure, get_pipeline, load_failures, read_log
 
@@ -44,3 +45,18 @@ def triage(failure_id: str) -> TriageResult:
     except KeyError:
         raise HTTPException(status_code=404, detail=f"Unknown failure {failure_id}") from None
     return get_pipeline().run_log(failure.id, read_log(failure))
+
+
+@app.get("/admin/chaos")
+def chaos_flags() -> ChaosFlags:
+    """Current outage simulation flags."""
+    return get_flags()
+
+
+@app.post("/admin/chaos")
+def set_chaos_flags(update: ChaosUpdate) -> ChaosFlags:
+    """Turn simulated outages on or off. Only the flags sent are changed; send all false to reset.
+
+    Demo only: in a real deployment this endpoint would not exist or would sit behind admin auth.
+    """
+    return update_flags(update)

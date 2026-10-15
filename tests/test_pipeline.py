@@ -3,7 +3,7 @@
 import json
 
 from app.config import Settings
-from app.llm.openrouter import LLMResponse
+from app.llm.client import LLMResponse
 from app.registry import load_registry
 from app.retrieval.documents import chunk_article, load_kb_chunks
 from app.retrieval.store import RetrievedDoc

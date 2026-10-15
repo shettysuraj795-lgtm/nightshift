@@ -13,6 +13,7 @@ ESCALATION_STEP = Step(text="Escalate to L2 with the full job log attached", act
 
 def abstention_reasons(
     *,
+    kb_available: bool,
     top_retrieval_score: float | None,
     valid_citations: int,
     confidence: float,
@@ -31,10 +32,13 @@ def abstention_reasons(
         reasons.append("the failure does not match any known failure mode")
     if not agrees_with_signatures:
         reasons.append("the diagnosis disagrees with the known error signature in the log")
-    if top_retrieval_score is None or top_retrieval_score < min_retrieval_score:
-        reasons.append("no knowledge base article is a close match")
-    if valid_citations == 0:
-        reasons.append("no answer could be backed by a valid source")
+    # With the knowledge base down, retrieval and citations cannot be judged,
+    # so those two checks are skipped (the result says the KB was unavailable).
+    if kb_available:
+        if top_retrieval_score is None or top_retrieval_score < min_retrieval_score:
+            reasons.append("no knowledge base article is a close match")
+        if valid_citations == 0:
+            reasons.append("no answer could be backed by a valid source")
     if confidence < min_confidence:
         reasons.append(f"confidence {confidence:.2f} is below {min_confidence:.2f}")
     if steps_left == 0:

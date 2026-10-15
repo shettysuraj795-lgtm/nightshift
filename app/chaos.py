@@ -34,20 +34,25 @@ _lock = threading.Lock()
 _flags: ChaosFlags | None = None
 
 
-def get_flags() -> ChaosFlags:
+def _current() -> ChaosFlags:
+    """The flags, read from configuration on first use. Call with the lock held."""
     global _flags
+    if _flags is None:
+        s = get_settings()
+        _flags = ChaosFlags(llm_down=s.chaos_llm_down, all_llms_down=s.chaos_all_llms_down, vector_db_down=s.chaos_vector_db_down)
+    return _flags
+
+
+def get_flags() -> ChaosFlags:
     with _lock:
-        if _flags is None:
-            s = get_settings()
-            _flags = ChaosFlags(llm_down=s.chaos_llm_down, all_llms_down=s.chaos_all_llms_down, vector_db_down=s.chaos_vector_db_down)
-        return _flags.model_copy()
+        return _current().model_copy()
 
 
 def update_flags(update: ChaosUpdate) -> ChaosFlags:
+    """Read and write under one lock, so two simultaneous updates cannot lose each other."""
     global _flags
-    current = get_flags()
     with _lock:
-        _flags = current.model_copy(update=update.model_dump(exclude_none=True))
+        _flags = _current().model_copy(update=update.model_dump(exclude_none=True))
         return _flags.model_copy()
 
 

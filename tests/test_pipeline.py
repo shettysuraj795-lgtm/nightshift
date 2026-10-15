@@ -44,7 +44,7 @@ class FakeLLM:
         self.replies = list(replies)
         self.calls: list[list[dict[str, str]]] = []
 
-    def generate_json(self, messages: list[dict[str, str]]) -> LLMResponse:
+    def generate_json(self, messages: list[dict[str, str]], start_at: str | None = None) -> LLMResponse:
         self.calls.append(messages)
         reply = self.replies.pop(0)
         if isinstance(reply, Exception):

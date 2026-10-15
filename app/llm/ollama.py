@@ -15,6 +15,7 @@ def ollama_provider(settings: Settings) -> OpenAICompatibleProvider:
         api_key="ollama",  # Ollama ignores the key, but the SDK requires one
         model=settings.ollama_model,
         timeout_seconds=settings.ollama_timeout_seconds,
+        retries=settings.ollama_retries,
         temperature=settings.llm_temperature,
         max_tokens=settings.llm_max_tokens,
     )

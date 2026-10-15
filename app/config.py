@@ -7,6 +7,7 @@ constant in the code.
 
 from functools import lru_cache
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -25,7 +26,7 @@ class Settings(BaseSettings):
     judge_model: str = ""
     llm_timeout_seconds: float = 30.0
     # Retries per provider on timeouts, 429 and 5xx, with exponential backoff and jitter.
-    llm_retries: int = 2
+    llm_retries: int = Field(default=2, ge=0)
     llm_backoff_initial_seconds: float = 0.5
     llm_backoff_max_seconds: float = 4.0
     llm_temperature: float = 0.0
@@ -44,6 +45,8 @@ class Settings(BaseSettings):
     ollama_model: str = "qwen2.5:3b"
     # A small local model is slower than the hosted one, so it gets more time.
     ollama_timeout_seconds: float = 60.0
+    # Retrying a local model that timed out rarely helps: it is slow, not flaky.
+    ollama_retries: int = Field(default=0, ge=0)
 
     # Infrastructure.
     qdrant_url: str = "http://localhost:6333"

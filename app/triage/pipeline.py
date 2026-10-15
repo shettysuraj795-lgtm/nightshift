@@ -53,11 +53,13 @@ PromptHook = Callable[[list[dict[str, str]]], None]
 
 
 class LLMProvider(Protocol):
-    """Anything that can answer a chat request with JSON text."""
+    """Anything that can answer a chat request with JSON text.
 
-    name: str
+    `start_at` names the provider to try first; the repair call uses it so the
+    model that wrote the invalid answer is the one asked to correct it.
+    """
 
-    def generate_json(self, messages: list[dict[str, str]]) -> LLMResponse: ...
+    def generate_json(self, messages: list[dict[str, str]], start_at: str | None = None) -> LLMResponse: ...
 
 
 # --- Failures and logs ------------------------------------------------------
@@ -224,10 +226,10 @@ class TriagePipeline:
         vector = self.retriever.embed_query(build_query(log_text))
         return self.retriever.search_kb(vector), self.retriever.search_tickets(vector)
 
-    def _call(self, messages: list[dict[str, str]], prompt_hook: PromptHook | None) -> LLMResponse:
+    def _call(self, messages: list[dict[str, str]], prompt_hook: PromptHook | None, start_at: str | None = None) -> LLMResponse:
         if prompt_hook:
             prompt_hook(messages)
-        return self.llm.generate_json(messages)
+        return self.llm.generate_json(messages, start_at=start_at)
 
     def generate(self, messages: list[dict[str, str]], prompt_hook: PromptHook | None = None) -> tuple[TriageDraft, LLMResponse]:
         """Call the model; if the JSON is invalid, show it the error once and ask again."""
@@ -240,7 +242,7 @@ class TriagePipeline:
                 {"role": "assistant", "content": response.text},
                 {"role": "user", "content": f"Your reply did not match the required JSON format:\n{error}\nReply again with only the corrected JSON object."},
             ]
-            response = self._call(repair, prompt_hook)
+            response = self._call(repair, prompt_hook, start_at=response.provider)
             return parse_draft(response.text), response
 
     def finalise(self, ctx: RunContext, draft: TriageDraft, mode: str, model_used: str, fallback_used: bool) -> TriageResult:
@@ -283,8 +285,9 @@ class TriagePipeline:
         # 5. Abstain when the evidence is weak. With the knowledge base down,
         #    retrieval and citations cannot be judged, so those checks are skipped.
         reasons = abstention_reasons(
-            top_retrieval_score=max(kb_scores, default=None) if ctx.kb_available else 1.0,
-            valid_citations=len(citation_check.valid) if ctx.kb_available else 1,
+            kb_available=ctx.kb_available,
+            top_retrieval_score=max(kb_scores, default=None),
+            valid_citations=len(citation_check.valid),
             confidence=draft.confidence,
             model_escalated=draft.escalate,
             known_category=category != UNKNOWN_CATEGORY,
@@ -357,8 +360,10 @@ class TriagePipeline:
         ]
         try:
             draft, response = self.generate(messages, prompt_hook)
-        except Exception:  # all providers failed, or invalid output twice: fall back to rules
+        except Exception as error:  # all providers failed, or invalid output twice: fall back to rules
             logger.exception("Model answer unavailable for %s, using degraded mode", failure_id)
+            reason = "invalid_output_after_repair" if isinstance(error, ValidationError) else "llm_unavailable"
+            ctx.events.append(reason)
             draft = degraded_draft(ctx.matches, kb_docs, self.modes, self.settings)
             return self.finalise(ctx, draft, "degraded", DEGRADED_MODEL_NAME, fallback_used=False)
 

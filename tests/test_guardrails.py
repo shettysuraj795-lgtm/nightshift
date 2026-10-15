@@ -146,7 +146,7 @@ def test_invalid_citations_are_dropped(citation: Citation) -> None:
 
 
 def reasons(**overrides) -> list[str]:
-    values = dict(top_retrieval_score=0.8, valid_citations=2, confidence=0.9, model_escalated=False,
+    values = dict(kb_available=True, top_retrieval_score=0.8, valid_citations=2, confidence=0.9, model_escalated=False,
                   known_category=True, agrees_with_signatures=True, steps_left=3,
                   min_retrieval_score=0.7, min_confidence=0.5)
     return abstention_reasons(**(values | overrides))
@@ -218,3 +218,7 @@ def test_mentioning_a_rerun_counts_as_a_rerun() -> None:
     (stricter icon, possibly approval) rather than risk a rerun slipping through as info."""
     result = check_steps([Step(text="Duplicate postings are possible if rerun too early", action="info")], REGISTRY["FM-001"])
     assert result.kept[0].action == "rerun_job"
+
+
+def test_knowledge_base_down_skips_retrieval_and_citation_checks() -> None:
+    assert reasons(kb_available=False, top_retrieval_score=None, valid_citations=0) == []

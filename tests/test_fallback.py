@@ -32,9 +32,10 @@ BAD_REQUEST = http_error(openai.BadRequestError, 400)
 class FakeProvider:
     """Plays back a script of replies: a string is a successful answer, an exception is raised."""
 
-    def __init__(self, name: str, *script: str | Exception) -> None:
+    def __init__(self, name: str, *script: str | Exception, retries: int = 2) -> None:
         self.name = name
         self.model = f"{name}/model"
+        self.retries = retries
         self.script = list(script)
         self.calls = 0
 
@@ -178,3 +179,43 @@ def test_knowledge_base_down_and_no_signature_still_escalates() -> None:
     chain, _ = make_chain(FakeProvider("openrouter"), FakeProvider("ollama"))
     result = pipeline_with(chain, DownRetriever()).run_log("S4", "2026-10-14 04:00:00 ERROR Something new\n")
     assert result.escalate and result.category == "unknown_novel"
+
+
+# --- Phase 4 review fixes --------------------------------------------------
+
+
+def test_provider_without_retries_is_tried_once() -> None:
+    backup = FakeProvider("ollama", TIMEOUT, "{}", retries=0)
+    chain, waits = make_chain(FakeProvider("openrouter", BAD_REQUEST), backup)
+    with pytest.raises(AllProvidersFailed):
+        chain.generate_json([])
+    assert backup.calls == 1 and waits == []
+
+
+def test_start_at_skips_earlier_providers() -> None:
+    primary = FakeProvider("openrouter", "{}")
+    chain, _ = make_chain(primary, FakeProvider("ollama", "{}"))
+    response = chain.generate_json([], start_at="ollama")
+    assert primary.calls == 0 and response.provider == "ollama" and response.fallback_used
+
+
+def test_repair_goes_to_the_model_that_wrote_the_invalid_answer() -> None:
+    primary = FakeProvider("openrouter", *[TIMEOUT] * 3)
+    backup = FakeProvider("ollama", "not json", json.dumps(VALID_DRAFT))
+    chain, _ = make_chain(primary, backup)
+    result = pipeline_with(chain).run_log("S2", LOCK_LOG)
+    assert primary.calls == 3  # not tried again for the repair
+    assert backup.calls == 2 and result.model_used == "ollama/model" and result.fallback_used
+
+
+def test_attempts_are_numbered_per_provider() -> None:
+    chain, _ = make_chain(FakeProvider("openrouter", TIMEOUT, TIMEOUT, TIMEOUT), FakeProvider("ollama", TIMEOUT, "{}"))
+    attempts = chain.generate_json([]).attempts
+    assert [(a.provider, a.attempt) for a in attempts] == [("openrouter", 1), ("openrouter", 2), ("openrouter", 3), ("ollama", 1), ("ollama", 2)]
+
+
+def test_degraded_results_say_why() -> None:
+    down, _ = make_chain(FakeProvider("openrouter", *[TIMEOUT] * 3), FakeProvider("ollama", *[TIMEOUT] * 3))
+    assert "llm_unavailable" in pipeline_with(down).run_log("S2", LOCK_LOG).guardrail_events
+    invalid, _ = make_chain(FakeProvider("openrouter", "bad", "still bad"), FakeProvider("ollama"))
+    assert "invalid_output_after_repair" in pipeline_with(invalid).run_log("S2", LOCK_LOG).guardrail_events

@@ -46,6 +46,7 @@ class OpenAICompatibleProvider:
         api_key: str,
         model: str,
         timeout_seconds: float,
+        retries: int,
         temperature: float,
         max_tokens: int,
         extra_body: dict | None = None,
@@ -55,6 +56,7 @@ class OpenAICompatibleProvider:
         self.api_key = api_key
         self.model = model
         self.timeout_seconds = timeout_seconds
+        self.retries = retries  # extra attempts on transient errors, used by the fallback chain
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.extra_body = extra_body or {}

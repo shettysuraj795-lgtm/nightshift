@@ -13,7 +13,6 @@ from app.triage.pipeline import get_failure, get_pipeline, load_failures, read_l
 APP_VERSION = "0.1.0"
 
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Start sending spans to Phoenix when the server starts (not on import, so tests stay offline)."""

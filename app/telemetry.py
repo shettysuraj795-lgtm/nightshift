@@ -60,7 +60,11 @@ def flush() -> None:
 
 
 def current_trace_id() -> str:
-    """The active trace ID as 32 hex characters; a random ID if tracing is off."""
+    """The active trace ID as 32 hex characters.
+
+    With tracing off there is no trace, so a random ID is returned to keep the
+    field filled; a Phoenix link built from it will not find anything.
+    """
     context = trace.get_current_span().get_span_context()
     return format(context.trace_id, "032x") if context.is_valid else uuid.uuid4().hex
 
